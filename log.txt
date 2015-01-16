@@ -1,0 +1,22 @@
+[01-14 16:35:16.413][TMS_Login  TermInfoUpLoad]
+[01-14 16:35:16.444][TermInfoUpLoad 1111 ]
+[01-14 16:35:16.474][TermInfoUpLoad 222 ]
+[01-14 16:35:16.503][TermInfoUpLoad 222---333 ]
+[01-14 16:35:16.533][TermInfoUpLoad 232332 ]
+[01-14 16:35:16.564][TermInfoUpLoad 3333 ]
+[01-14 16:35:16.593][TermInfoUpLoad 4444 ]
+[01-14 16:35:16.625][MC CommSend]:4E 45 57 4C 41 4E 44 20 20 20 20 20 20 20 20 20 20 20 20 20 53 50 36 30 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 4A 36 4E 4C 30 30 35 34 35 36 39 39 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 30 33 31 30 30 30 30 34 30 30 30 30 30 30 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 31 30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 30 30 30 30 00 05 41 41 41 30 30 00 1C 50 50 50 30 31 30 30 31 39 6D 61 69 6E 63 74 72 6C 20 20 20 20 20 20 20 20 30 30 30 00 05 44 44 44 30 30 00 03 4F 4F 4F 3B 
+[01-14 16:35:16.713][Comm Client] PubCommSend nDataLen is [230]
+[01-14 16:35:16.743][Comm Client] PubCommWrite Start: nDataLen is [240]
+[01-14 16:35:16.773][Comm Client] Waiting comm server response command ...
+[01-14 16:35:16.803][Comm Client] LCommWriteShareMem[06]5`      NEWLAND             SP60                J6NL00545699                          03100004000000                                      10000000001000000000100000000010000000001000000000AAA00PPP010019mainctrl        000DDD00OOO;^
+[01-14 16:35:16.834][Comm Client] comm server return succ
+[01-14 16:35:16.863][Comm Client] PubCommWrite Succ.
+[01-14 16:35:16.895][Comm Client] PubCommRecv Start...[nScheme: 24][timeout:65]
+[01-14 16:35:16.923][Comm Client] Waiting comm server response command ...
+[01-14 16:35:16.954][Comm Client] LCommWriteShareMem[07]
+[01-14 16:35:22.565][Comm Client] Detect esc key press ,return APP_QUIT
+[01-14 16:35:22.593][Comm Client] PostMessageExitCommServer...
+[01-14 16:35:34.214][Comm Client] PubCommClose Start:
+[01-14 16:35:34.245][Comm Client] Add Sequence Command(RS232)[cmd:09].
+[01-14 16:35:34.274][Comm Client] PubCommClose Succ.
