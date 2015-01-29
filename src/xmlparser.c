@@ -27,16 +27,24 @@
  * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
  *
  */
+#include <pthread.h>
 
 #include "xmlparser.h"
 #include "aliqr.h"
+#ifdef ST_QRCODE
 char stqrcode[QRRESULTSTR]={0};
+#endif
 char timemark[32]={0};
+#if 0
 char qrout_trade_no[65]={0};
-static struct qr_result* st_query_result;
+#endif
+static struct qr_result* st_query_result;  
+extern char time_mark[32];
+extern pthread_mutex_t prmutex;
 
 int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int order_type)
 {
+	  pthread_mutex_lock(&prmutex);
     CURL *curl;
     CURLcode res;
     char https_req[1024*3];
@@ -118,7 +126,15 @@ int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int 
                 DebugErrorInfo("                     --------------\n");
                 DebugErrorInfo("                     %lu tags total\n", state.tags);
                 //printf("                     %s tags total\n", state.characters.memory);
-                //memcpy(qr_result,stqrcode,strlen(stqrcode));
+                #ifdef ST_QRCODE
+                //memcpy(qr_result,stqrcode,strlen(stqrcode));      
+                if(stqrcode[0] != '\0' && time_mark[0] != '\0') {
+                memcpy(query_result->order,stqrcode,strlen(stqrcode));
+                DebugErrorInfo("the qr_result is %s\n, the stqrcode is %s\n",query_result->order,stqrcode);
+                }
+                memset(stqrcode,0,QRRESULTSTR);
+                #endif
+                memcpy(query_result->time_mark,timemark,strlen(timemark));                
 #if 0
                 if(stqrcode[0] != '\0') {
                     memcpy(query_result->order,stqrcode,strlen(stqrcode));
@@ -144,6 +160,7 @@ int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int 
     }
 
     curl_global_cleanup();
+    pthread_mutex_unlock(&prmutex);
     printf("exit alipay_main\n");
     DebugErrorInfo("exit alipay_main\n");
     return 0;
@@ -236,7 +253,9 @@ void endElement(void *userData, const XML_Char *name)
     }
     if( strcmp(name,"tm") == 0) {//time_mark
         if(state->characters.memory != NULL) {
-            memcpy(st_query_result->time_mark, state->characters.memory,state->characters.size);
+            //memcpy(st_query_result->time_mark, state->characters.memory,state->characters.size);  
+            memcpy(timemark,state->characters.memory,state->characters.size); 
+            DebugErrorInfo("%5lu   %10lu   %s %s\n", state->depth, state->characters.size, name, state->characters.memory);
         }
     }
     if( strcmp(name,"rfa") == 0) {//refund_amount

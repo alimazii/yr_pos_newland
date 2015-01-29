@@ -117,4 +117,7 @@ struct queryInfo {
 int alipay_precreate(char* precr, int* len, struct payInfo* order_info, int type);
 char* alipay_postcreate(int type);
 void DebugErrorInfo(char* lpszFormat, ...);
+int getPosKey();
+void getIMSIconfig();
+int getsubject(char* name,char* buf);
 #endif

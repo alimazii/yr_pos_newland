@@ -45,7 +45,7 @@ VERNO = 01
 #内部版本号为编译日期（内部版本号定义，格式为:4位银行名称+1位应用类别+1位银行版本+YYYYMMDD+2位序号）
 INTERVER = $(join "\"$(TAG)$(BANK)$(APPNO), $(POSYEAR)$(POSMONTH)$(POSDAY)$(VERNO)\"")
 
-CFLAGS += -Wall -DNDEBUG $(CROSS_CFLAGS) -O2 $(INCPATH)
+CFLAGS += -Wall -DNDEBUG  $(CROSS_CFLAGS) -O2 $(INCPATH)
 
 
 
@@ -56,7 +56,7 @@ VPATH =src $(OBJDIR)
 INCLPATH =  -I$(INCDIR) -I$(APIDIR)
 
 # 程序链接参数
-LDFLAGS += -L$(APIDIR) -lndk -L$(LIBDIR) -lcurl -lexpat -lrt
+LDFLAGS += -L$(APIDIR) -lndk -L$(LIBDIR) -lcurl -lexpat -lrt -pthread
 
 # 生成的程序名
 NAME = main
@@ -94,4 +94,4 @@ clean:
 	-$(RM) $(OBJDIR)/*.deps
 	
 NLD:$(NAME)
-	$(MAKENLD) -h HeaderInfo.ini -f main pri_* -o $(APPNAME) -C $(BINDIR)/ 
+	$(MAKENLD) -h HeaderInfo.ini -f main pri_* config.txt print.bmp -o $(APPNAME) -C $(BINDIR)/ 

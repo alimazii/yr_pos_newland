@@ -1,6 +1,7 @@
 #include "aliqr.h"
 #include "qrgenerator.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 #include <time.h>
@@ -8,7 +9,7 @@
 #include "NDK.h"
 #include "QR_Encode.h"
 
-char qrQueryResult[16] = {0};
+
 struct payInfo qrpay_info;
 unsigned long long query_number = 0;
 unsigned long long query_number_idx = 1;
@@ -23,6 +24,7 @@ char szQrcodeString[QRRESULT] = {0};
 char subject[128+1] = {0};
 char* defaultsubject = "Alipay";
 int getsubject(char* name,char* buf);
+
 #if 0
 int main(int argc, char** argv)
 {
@@ -94,6 +96,7 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
     struct payInfo* in = (struct payInfo*)gin; 
     // code from d620d end
 
+    int i;
 
     struct tm *ptr;
     time_t td;
@@ -106,7 +109,7 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
     if(jfkey[0] == 0 && getPosKey() > 0)
          return 1;
     strcpy(qrpay_info.order_key,jfkey);
-#if 1
+
     /* Time for Normal Platform */
     time(&td);
     ptr = (struct tm *)localtime(&td);
@@ -115,7 +118,7 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
         //sprintf(ticket_number,"%s%s%s%s%s00","14","10","10","10","10");
         /* use last 4-bit of IMSI */
         strncpy(client_number+1, &(qrpay_info.imsi[11]), 5);
-        strcat(client_number, ticket_number);
+        strcat(client_number, ticket_number);       
         query_number = (unsigned long long)atoll(client_number);
         if(old_query_number == query_number/100 ) {
             query_number = query_number + query_number_idx;
@@ -125,9 +128,8 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
             old_query_number = query_number/100; 
         }
     //}
+    qrpay_info.order_number = query_number;    
 
-    qrpay_info.order_number = query_number;
-#endif
     strcpy(qrpay_info.total_fee,price);
     //strcpy(qrpay_info.total_fee,"0.01");^M
     //strcpy(qrpay_info.order_subject,"ccc");
@@ -156,9 +158,10 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
 
     memset(szQrcodeString, 0,sizeof(szQrcodeString)); 
     /* print the qr code from alipay */
-    DebugErrorInfo("Get Before alipay_main\n");
+    DebugErrorInfo("Get Before alipay_main,imsi is %s\n",qrpay_info.imsi);
     alipay_main(out, &qrpay_info, ALI_PREORDER);
     szSourceString = szQrcodeString;
+
     if(strstr(out->qrcode, "https://qr.alipay.com/")) {
         /* print QR code on D620D */
         //ret = PrintQR(10, 1, 2, szSourceString, 5, 5);
@@ -174,16 +177,14 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
         ret = NDK_PrnInit(0);
         if(ret != NDK_OK)
         	  return ret;
-        NDK_PrnImage(qrBmpBuff.xsize, qrBmpBuff.ysize, 50, qrBmpBuff.bmpbuff); /* offset to 50 pixel */	
-        ret = NDK_PrnStart();  
+        NDK_PrnImage(qrBmpBuff.xsize, qrBmpBuff.ysize, 110, qrBmpBuff.bmpbuff); /* offset to 110 pixel */	
+        ret = NDK_PrnStart(); 
         printf("qrcode:%s\n",out->qrcode);
         DebugErrorInfo("qrcode:%s\n",out->qrcode);
-        NDK_PrnStr("\n");
-        NDK_PrnStr("´òÓ¡²âÊÔ\n");
-        NDK_PrnStart();
+
         if (0 > ret)
         {
-            printf("the PrintQR return value is %d\n",ret);
+            DebugErrorInfo("the PrintQR return value is %d\n",ret);
         }
     } else {
         ret = 1;
@@ -299,27 +300,27 @@ int getsubject(char* name,char* buf)
 
 void getIMSIconfig()
 {
-#if 0	
+#if 1	
     FILE *fp;
     int i;
     char buffer[30];
     if (pos_imsi[0] == '\0'){
 
-        /* get imsi from config.tx */
-        fp = fopen("/usr/local/config.txt","r");
+        /* get imsi from config.txt */
+        fp = fopen("config.txt","r");
         if(fp == NULL)
         {
-            printf("couldn't open config.txt\n");
+            DebugErrorInfo("couldn't open config.txt\n");
             return;
         }
         if( fgets(buffer, 30, fp) == NULL )
         {
-            printf("Error reading config\n");
+            DebugErrorInfo("Error reading config\n");
             fclose(fp);
             return ;
         }
         for (i=0; i<30; i++) {
-            if(buffer[i] == '\n') {
+            if(buffer[i] == '\n' || buffer[i] == '\r') {
                 buffer[i] = '\0';
                 break;
             }
@@ -327,11 +328,13 @@ void getIMSIconfig()
         fclose(fp);
         /* copy after IMSI: */
         strcpy(pos_imsi,&buffer[5]);
-        printf("the pos imsi buffer string is %s\n",pos_imsi);
+        DebugErrorInfo("the pos imsi buffer string is %s\n",pos_imsi);
     }
+
     strcpy(qrpay_info.imsi,pos_imsi);
-#endif
-    strcpy(qrpay_info.imsi,"460040001805635"); /* temp solution for newland */    
+#endif 
+    //strcpy(pos_imsi, "460040001805635");
+    //strcpy(qrpay_info.imsi,"460040001805635"); /* temp solution for newland */    
 }
 #if 0
 
