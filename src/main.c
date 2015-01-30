@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <signal.h>
+#include <time.h>
 #include "NDK.h"
 #include "aliqr.h"
 
@@ -45,12 +46,59 @@ char* str_timemark = "1408001801550";
 pthread_mutex_t prmutex;
 void *thr_fn(void* arg);
 
+static char Defualtdata[] = "yy-mm-dd/hh:mm";
+char* serial2date(char* serialNo)
+{
+    char* ret = &Defualtdata[0];
+    Defualtdata[0] = serialNo[5];
+    Defualtdata[1] = serialNo[6];
+
+    Defualtdata[3] = serialNo[7];
+    Defualtdata[4] = serialNo[8];
+
+    Defualtdata[6] = serialNo[9];
+    Defualtdata[7] = serialNo[10];
+
+    Defualtdata[9] = serialNo[11];
+    Defualtdata[10] = serialNo[12];
+
+    Defualtdata[12] = serialNo[13];
+    Defualtdata[13] = serialNo[14];
+    return ret;
+}
+
+int SplitStr(char *buff, char *parr[], char *token) 
+{
+        char *pc = strtok(buff, token); 
+        int i;  
+
+        for(i=0; pc != NULL; i++)
+        {       
+                parr[i] = pc;
+                pc = strtok(NULL, token); 
+        }       
+        
+        return i;
+}
 
 /* timer to get alipay payment response -- sample code */ 
 void payment_alarm_handler(int sig) {
     //struct payInfo qrpay_info;
     struct qr_result payquery_result;
-    int nbytes;
+    int ret,nbytes,ucKey,i;
+    EM_PRN_STATUS PrnStatus;
+    
+    char buffer[1024];
+    int trade_num;
+    char *trade_ptr[100] = {NULL}; 
+    char *trade_detail[5] = {NULL}; 
+    struct receipt_info pos_receipt;
+    char PrintBuff[30];
+    //T_DATETIME tTime;    
+    struct tm *ptr;
+    time_t td;
+    char pos_date[12];
+    char pos_time[12];    
     
 
 
@@ -116,6 +164,139 @@ void payment_alarm_handler(int sig) {
     write(socket_fd, payquery_result.qr_string, nbytes);
     close(socket_fd);
 #endif    
+    printf("MESSAGE FROM ALIPAY: %s\n", payquery_result.order);
+    //nbytes = snprintf(buffer, 256, "hello from the server");
+    //write(connection_fd, buffer, nbytes);
+    /* start print out the payment query result */
+
+    trade_num = SplitStr(payquery_result.order,trade_ptr,"|");
+
+    //write(tty_data.posfd,alipay_receipt,sizeof(alipay_receipt));
+    ///write(tty_data.posfd,"\n",1);
+    /* get system time */
+    time(&td);
+    ptr = localtime(&td);
+    strftime(pos_date,sizeof(pos_date),"%Y-%m-%d",ptr);
+    strftime(pos_time,sizeof(pos_time),"%H:%M:%S",ptr);
+
+
+    for (i=0; i<trade_num; i++){
+        DebugErrorInfo("number %d trade:%s\n",i,trade_ptr[i]);
+        SplitStr(trade_ptr[i],trade_detail,",");
+        memset(pos_receipt.serial_number,0,24);
+        memset(pos_receipt.out_trade_no,0,16);
+        memset(pos_receipt.trade_no,0,32);
+        memset(pos_receipt.total_fee,0,16);
+
+        strcpy(pos_receipt.serial_number,trade_detail[0]);
+        strcpy(pos_receipt.out_trade_no,trade_detail[1]);
+        strcpy(pos_receipt.trade_no,trade_detail[2]);
+        strcpy(pos_receipt.total_fee,trade_detail[3]);
+        ///WritePayment(1, &pos_receipt);
+        /// write(tty_data.posfd,"\n",1);
+        ///write(tty_data.posfd,"\n",1);
+        //pthread_mutex_lock(&prmutex);
+START_PRINT:
+        if(NDK_PrnInit(0) != NDK_OK) {                                                                                                                                                                                                                                                                                                
+            DebugErrorInfo("the printer is not working well!\n");                                                                                                                                                                                                                                                                            
+            goto end1;                                                                                                                                                                                                                                                                                                               
+        } 
+        
+
+        memset(PrintBuff,0,30);
+
+        NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
+        strcpy(PrintBuff,"支付宝交易凭条");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n\n\n");
+
+        strcpy(PrintBuff,"序列号：\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr(pos_receipt.serial_number);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"商户订单号：\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr(pos_receipt.out_trade_no);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"日期：\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr(pos_date);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"时间：\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr(pos_time);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"-------------------\n");
+        NDK_PrnStr(PrintBuff);	   
+
+        strcpy(PrintBuff,"支付宝当面付\n");
+        NDK_PrnStr(PrintBuff);	   
+
+        strcpy(PrintBuff,"交易号：\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr(pos_receipt.trade_no);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"金额：\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr(pos_receipt.total_fee);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"签名 \n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+
+        strcpy(PrintBuff,"本人同意上述交易\n");
+        NDK_PrnStr(PrintBuff);
+
+        //NDK_PrnStr("\n\n\n");
+	 
+
+        //开始打印            
+        ret = NDK_PrnStart(); 
+        //pthread_mutex_unlock(&prmutex);                                                                                                                                                                                                                                                                                                                                   
+        DebugErrorInfo("print error code:[%d]\n", ret);                                                                                                                                                                                                                                                                                                             
+        if(ret != NDK_OK)                                                                                                                                                                                                                                                                                                                                          
+        {                                                                                                                                                                                                                                                                                                                                                     
+            NDK_PrnGetStatus(&PrnStatus);
+            if(PrnStatus & PRN_STATUS_BUSY)                                                                                                                                                                                                                                                                                                                           
+                goto START_PRINT;                                                                                                                                                                                                                                                                                                                             
+            else if(PrnStatus & PRN_STATUS_VOLERR)                                                                                                                                                                                                                                                                                                                        
+                goto end2;                                                                                                                                                                                                                                                                                                                                    
+            else if(PrnStatus & PRN_STATUS_NOPAPER || PrnStatus & PRN_STATUS_OVERHEAT)                                                                                                                                                                                                                                                                                                                         
+                goto end1;                                                                                                                                                                                                                                                                                                                                    
+        } 
+        NDK_PrnFeedPaper(PRN_FEEDPAPER_AFTER); 
+        continue;
+end1:
+
+        NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        NDK_ScrRefresh(); 
+        NDK_KbGetCode(0, &ucKey);
+
+
+        goto START_PRINT;
+end2:
+
+        NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        NDK_ScrRefresh(); 
+        NDK_KbGetCode(0, &ucKey);
+        goto START_PRINT;  
+    
+    }
+
+
+
     query_count = 0;
     alarm(0);
 
@@ -254,12 +435,12 @@ int main(void)
             NDK_KbGetCode(0,&ucKey);
             goto end;
         } else if (nStatus==PPP_STATUS_CONNECTED) {            
-            NDK_ScrPrintf("PPP DATA CONNECTED\n");
+            NDK_ScrPrintf("拨号成功\n");
             NDK_ScrRefresh();
-            NDK_KbGetCode(0,&ucKey);
+            NDK_KbGetCode(2,&ucKey);
             break;
         } else {
-            NDK_ScrPrintf(".");
+            NDK_ScrPrintf("正在拨号...\n");
             NDK_ScrRefresh();
             if(NDK_KbGetCode(1,&ucKey)==NDK_OK && ucKey==K_ESC) {
                 goto end;
@@ -379,16 +560,19 @@ int main(void)
 				        	  
 				        	  case K_ENTER:	
 				        	  	NDK_ScrClrs();
-				        	  	NDK_ScrDispString(20, 0, "输入完成请按OK键",0);
+				        	  	NDK_ScrDispString(15, 0, "输入完成请按确认键",0);
 				        	  	NDK_ScrDispString(4, 24, "请输入金额:",0);      
 				        	  	NDK_ScrRefresh();
-				        	  	strncpy(numBuf,"0.00",5);
+				        	  	//strncpy(numBuf,"0.00",5);
 				        	  	/* FIX ME Later,Money Check */
-				        	  	NDK_KbGetInput(numBuf, 4, 7, NULL, INPUTDISP_OTHER, 0, INPUT_CONTRL_LIMIT_ERETURN);
+				        	  	ret = NDK_KbGetInput(numBuf, 4, 7, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN);
+				        	  	if(ret == NDK_ERR)
+				        	  		break;
 				        	  	DebugErrorInfo("The Input Money:%s\n",numBuf);
 				        	  	
 				        	  	err = pthread_create(&ntid, NULL, thr_fn, (void*)numBuf);
 				        	  	print_logo();
+				        	  	err = pthread_join(ntid, NULL);
 
 
                       if(err != 0)
@@ -408,11 +592,11 @@ int main(void)
 				    break; 
 				    #endif
             //ret = generator_qrcode_to_bmp((void*)&commTestOut,"0.01",(void*)&commTestIn);
-			    	
-#if 0			    	
+			    				    	
 			    case K_TWO:
-			    	GprsTest();
+			    	querySingle();
 			    	break;
+#if 0			    	
 			    case K_THREE:
 			    	EthernetTest();
 			    	break;
@@ -698,8 +882,9 @@ end1:
     NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
     NDK_ScrDispString(36, 36, "打印失败", 0); 
     NDK_ScrRefresh(); 
-    NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-    return; 
+    NDK_KbGetCode(2, &ucKey);
+    goto START_PRINT;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+    //return; 
                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                           
 end2:
@@ -709,8 +894,9 @@ end2:
     NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
     NDK_ScrDispString(24, 36, "无法执行打印",0); 
     NDK_ScrRefresh(); 
-    NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
-    return;                                                                                                                                                                                                                                                                                                                                               
+    NDK_KbGetCode(2, &ucKey);
+    goto START_PRINT;                                                                                                                                                                                                                                                                                                                                       
+    //return;                                                                                                                                                                                                                                                                                                                                               
 } 
 
 void printAD()
@@ -802,20 +988,7 @@ START_PRINT:
    
     printAD();
 
-
-    NDK_PrnStr("\n\n\n");
-    ret = NDK_PrnStart();
-    DebugErrorInfo("print error code:[%d]\n", ret);
-    if(ret != NDK_OK)                                                                                                                                                                                                                                                                                                                                          
-    {                                                                                                                                                                                                                                                                                                                                                     
-        NDK_PrnGetStatus(&PrnStatus);
-        if(PrnStatus & PRN_STATUS_BUSY)                                                                                                                                                                                                                                                                                                                           
-            goto START_PRINT;                                                                                                                                                                                                                                                                                                                             
-        else if(PrnStatus & PRN_STATUS_VOLERR)                                                                                                                                                                                                                                                                                                                        
-            goto end2;                                                                                                                                                                                                                                                                                                                                    
-        else if(PrnStatus & PRN_STATUS_NOPAPER || PrnStatus & PRN_STATUS_OVERHEAT)                                                                                                                                                                                                                                                                                                                         
-            goto end1;                                                                                                                                                                                                                                                                                                                                    
-    }   
+    NDK_PrnFeedPaper(PRN_FEEDPAPER_AFTER);   
 
     return;
 
@@ -880,12 +1053,170 @@ end2:
     if(query_count == 0)                                                                                
             alarm(10);                                                                                  
     else                                                                                             
-       query_count = 5;                                                                                 
+       query_count = 10;                                                                                 
                                                                                                         
     return ret;                                                                                          
- }	                                                                                                 
+ }
+ 
+#if 0 	                                                                                                 
+//user don't need to input imsi and year month date, but hour,minutes,and serial no is needed,
+void getSNoPre(char* prefix_str)
+{
+    //T_DATETIME tTime;
+    struct tm *ptr;
+    time_t td;
+    char ticket_number[13]={0};
+    char client_number[21]={0};
+    
+    
+    getIMSIconfig();
+    //GetDateTime(&tTime);
+    time(&td);
+    ptr = localtime(&td);
+
+    memset(ticket_number, 0, 13);
+    memset(client_number, 0, 21);
+    client_number[0] = '1'; //to avoid atoi bug
+    //sprintf(ticket_number,"%s%s%s\0",
+            //tTime.year, tTime.month, tTime.day);
+    strftime(ticket_number,sizeof(ticket_number),"%Y-%m-%d",ptr);
+    /* use last 4-bit of IMSI */
+    strncpy(client_number+1, &(qrpay_info.imsi[11]), 5);
+    strcat(client_number, ticket_number);
+    memcpy(prefix_str, client_number,strlen(client_number));
+    DebugErrorInfo("ticket_number:%s, client_number:%s, prefix:%s\n",
+            ticket_number, client_number, prefix_str);
+}
                                                                                                                             
-                                                                                                                            
+int viewsingle(void* gout,char* serial_number)
+{
+    struct qr_result* out = (struct qr_result*)gout; 
+    getIMSIconfig();
+    qrpay_info.order_number = atoll(serial_number);
+    /* print the qr code from alipay */
+    alipay_main(out, &qrpay_info, ALI_VIEW_SINGLE);
+    if(out->is_success == 'T' && strcmp(out->total_status,"TRADE_SUCCESS") == 0)
+        return 1;
+    else
+        return 0;
+}
+#endif
+ 
+void querySingle(void)
+{
+    char prefix[12] = {0};
+    unsigned long long prefixint;
+    char hmno[7] = {0};
+    char queryNo[18] = {0};
+    int ret = 0; 
+    EM_PRN_STATUS PrnStatus; 
+    int ucKey;
+
+    NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+    NDK_ScrDispString(0, 24, "请输入交易单上序列号的后6位",0);
+    NDK_ScrDispString(0, 36, "查询当日交易",0);
+    NDK_ScrRefresh();
+
+    getSNoPre(prefix);
+    DebugErrorInfo("queryNO prefixint:\n");   
+    DebugErrorInfo("queryNO prefix:%s \n", prefix);   
+    //sprintf(prefix, "%lld\0", prefixint);
+    //TextOut(0, 5, ALIGN_LEFT, prefix);
+    memcpy(queryNo,prefix,11);
+    //ret = Input(0,5,queryNo,17,IME_NUMBER,WHITE, RED,FALSE,TRUE,FALSE);
+		ret = NDK_KbGetInput(queryNo, 6, 17, NULL, INPUTDISP_OTHER, 0, INPUT_CONTRL_LIMIT_ERETURN);
+		if(ret == NDK_ERR)
+			return;
+
+    //memcpy(queryNo,prefix,11);
+    //memcpy(queryNo+11,hmno,6);
+    DebugErrorInfo("queryNo:%s\n",queryNo);
+    
+    ret = viewsingle((void*)&commTestOut, queryNo);
+    if(ret)
+    {
+        char PrintBuff[30];
+        NDK_ScrClrs();
+        NDK_ScrDispString(0, 24, "该单交易已成功",0);
+        NDK_ScrDispString(0, 36, queryNo,0); 
+START_PRINT:
+
+        if(NDK_PrnInit(0) != NDK_OK) {                                                                                                                                                                                                                                                                                                
+            DebugErrorInfo("the printer is not working well!\n");                                                                                                                                                                                                                                                                            
+            goto end1;                                                                                                                                                                                                                                                                                                               
+        }
+
+        memset(PrintBuff,0,30);
+        NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
+        strcpy(PrintBuff,"以下交易确已成功\n");
+        NDK_PrnStr(PrintBuff);
+
+        strcpy(PrintBuff,"序列号:\n");
+        strcat(PrintBuff,queryNo);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+                
+        strcpy(PrintBuff,"交易时间:\n");
+        strcat(PrintBuff, serial2date(queryNo));        
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");	
+           
+        strcpy(PrintBuff,"商户订单号:\n");
+        strcat(PrintBuff,commTestOut.out_trade_no);
+        NDK_PrnStr(PrintBuff);	
+        NDK_PrnStr("\n");
+           
+        strcpy(PrintBuff,"金额：\n");
+        strcat(PrintBuff, commTestOut.total_fee);        
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+
+        //NDK_PrnStr("\n\n\n");	 
+        ret = NDK_PrnStart();;
+
+        DebugErrorInfo("print error code:[%d]\n", ret);
+        if(ret != NDK_OK)                                                                                                                                                                                                                                                                                                                                          
+        {                                                                                                                                                                                                                                                                                                                                                     
+            NDK_PrnGetStatus(&PrnStatus);
+            if(PrnStatus & PRN_STATUS_BUSY)                                                                                                                                                                                                                                                                                                                           
+                goto START_PRINT;                                                                                                                                                                                                                                                                                                                             
+            else if(PrnStatus & PRN_STATUS_VOLERR)                                                                                                                                                                                                                                                                                                                        
+                goto end2;                                                                                                                                                                                                                                                                                                                                    
+            else if(PrnStatus & PRN_STATUS_NOPAPER || PrnStatus & PRN_STATUS_OVERHEAT)                                                                                                                                                                                                                                                                                                                         
+                goto end1;                                                                                                                                                                                                                                                                                                                                    
+        }
+        NDK_PrnFeedPaper(PRN_FEEDPAPER_AFTER);   
+        return;
+end1:
+	                                                                                                                                                                                                                                                                                                                                                     
+        NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        NDK_ScrRefresh(); 
+        NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+        return; 
+                                                                                                                                                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                                                                          
+end2:
+	                                                                                                                                                                                                                                                                                                                                                     
+        NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        NDK_ScrRefresh(); 
+        NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
+        return;
+
+
+    } else {
+        NDK_ScrClrs();
+        NDK_ScrDispString(24, 24, "该单交易失败", 0);
+        NDK_ScrRefresh(); 
+        NDK_KbGetCode(2, &ucKey);
+    }
+
+}                                                                                                                            
                                                                                                                             
                                                                                                                             
                                                                                                                                                                                                                                                                                                                                                         
