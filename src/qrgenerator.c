@@ -302,8 +302,13 @@ void getIMSIconfig()
 {
 #if 1	
     FILE *fp;
-    int i;
+    int i, ret;
     char buffer[30];
+    
+    ret = NDK_WlGetInfo(WLM_INFO_IMSI, &pos_imsi, 20);
+    if (ret == NDK_OK) 
+    		DebugErrorInfo("the pos imsi from SIM is %s\n",pos_imsi);
+
     if (pos_imsi[0] == '\0'){
 
         /* get imsi from config.txt */
@@ -325,6 +330,7 @@ void getIMSIconfig()
                 break;
             }
         }
+
         fclose(fp);
         /* copy after IMSI: */
         strcpy(pos_imsi,&buffer[5]);
