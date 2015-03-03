@@ -590,9 +590,9 @@ int main(void)
     	  NDK_ScrDispString(4,36,"3.日结",0);
     	  NDK_ScrDispString(66,12,"4.签到",0);
     	  NDK_ScrDispString(66,24,"5.结算签退",0);
-    	  
+    	  NDK_ScrDispString(66,36,"6.设置",0);
     #ifdef REFUND_EN
-        NDK_ScrDispString(66,36,"6.退货",0);
+        NDK_ScrDispString(66,48,"7.退货",0);
     #endif	  
         NDK_ScrRefresh();
     	  NDK_KbGetCode(0, &ucKey);
@@ -667,6 +667,13 @@ int main(void)
           case K_FIVE:
             qrexchangedorder();
             break;
+            
+#ifdef CONFIG_INPUTKEY            
+          case K_SIX:
+          	setPosKey();
+          	break;
+#endif
+          	  
 #ifdef RECEIPT_CONF            
           case K_F3:
             SetReceiptInfo();

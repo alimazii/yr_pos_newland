@@ -371,35 +371,86 @@ int alipay_query_24h(char* query_24h)
 
 int getPosKey()
 {
-#if 0
+#ifdef CONFIG_INPUTKEY
         FILE *fp;
         int i;  
 
         /* get key from config.txt */
-        fp = fopen("/usr/local/config.txt","r");
+        fp = fopen("config.txt","r");
         if(fp == NULL)
         {       
-            syslog(LOG_ERR,"couldn't open config.txt\n");
+            DebugErrorInfo("couldn't open config.txt in getPosKey\n");
             return 1; 
         }       
-        fseek(fp, 21, SEEK_SET); /* 5 + 15 + 1 */  
+        fseek(fp, 22, SEEK_SET); /* 5 + 15 + 2 */  
         if( fgets(jfkey, sizeof(jfkey), fp) == NULL )
         {       
-            syslog(LOG_ERR,"Error reading jfkey in config\n");
+            DebugErrorInfo("Error reading jfkey in config\n");
             fclose(fp);
             return 1;
         }       
         for (i=0; i<sizeof(jfkey); i++) {
-            if(jfkey[i] == '\n') { 
+            if(jfkey[i] == '\n' || jfkey[i] == '\r') { 
                 jfkey[i] = '\0'; 
                 break;  
             }       
         }       
 
         fclose(fp);
-        memfrob(jfkey, strlen(jfkey));
-#endif
+        //memfrob(jfkey, strlen(jfkey));
+#else
         strcpy(jfkey,"11"); /* temp solution for newland */
+#endif        
         return 0;
 
 }
+
+#ifdef CONFIG_INPUTKEY
+int setPosKey()
+{
+        FILE *fp;
+        int i,ret,ucKey;  
+
+        /* set key to config.txt */
+        fp = fopen("config.txt","r+");
+        if(fp == NULL)
+        {       
+            DebugErrorInfo("couldn't open config.txt in setPosKey\n");
+            return 1; 
+        }
+        fseek(fp, 22, SEEK_SET); /* 5 + 15 + 2 */ 
+        	  
+        if(jfkey[0] == 0 && fgets(jfkey, sizeof(jfkey), fp) != NULL){
+        	  
+        	  for (i=0; i<sizeof(jfkey); i++) {
+               if(jfkey[i] == '\n' || jfkey[i] == '\r') { 
+                   jfkey[i] = '\0'; 
+                   break;  
+               }       
+            }
+            DebugErrorInfo("update reading key %s from config.txt\n",jfkey);
+        }
+        
+        NDK_ScrClrs();
+        NDK_ScrDispString(0, 0, "请输入密钥(2-32位):\n",0);
+        NDK_ScrRefresh();    
+        
+        ret = NDK_KbGetInput(jfkey, 2, 32, NULL, INPUTDISP_OTHER, 0, INPUT_CONTRL_NOLIMIT_ERETURN);
+		    if(ret == NDK_ERR)
+			     return 1;
+			  if (fputs(jfkey, fp) == EOF) 
+			  {
+            DebugErrorInfo("couldn't write key to config.txt\n");
+            return 1; 			  	
+			  } 
+			  fclose(fp);
+        NDK_ScrClrs();
+        NDK_ScrDispString(24, 12, "密钥更新成功",0);
+        NDK_ScrDispString(24, 24, "需要重启机器",0);
+        NDK_ScrRefresh(); 
+        
+        NDK_KbGetCode(2, &ucKey);
+        NDK_SysReboot();
+        return 0;			   
+}
+#endif
