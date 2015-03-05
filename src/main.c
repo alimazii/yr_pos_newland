@@ -523,12 +523,12 @@ int main(void)
     while(1){
 
         nbytes = 0;
-        memset(buffer, 3000, 0);
+        memset(buffer, 0, 3000);
         NDK_KbGetInput(buffer, 2, 100, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_NOLIMIT_ERETURN);
         if (ret == NDK_OK ){
 
         stream = popen(buffer, "r");
-        memset(buffer, 3000, 0);
+        memset(buffer, 0, 3000);
         nbytes = fread(buffer, sizeof(char), sizeof(buffer), stream);
         pclose(stream);
 
