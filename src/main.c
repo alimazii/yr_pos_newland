@@ -12,20 +12,27 @@
 #include <unistd.h> 
 #include <sys/wait.h>
 
-#include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
-
 #include <stdarg.h>
 #include <pthread.h>
 #include <signal.h>
 #include <time.h>
+
+#include <fcntl.h>
+
 #include "NDK.h"
 #include "aliqr.h"
+
+#define max(x,y) ({ typeof(x) _x = (x); typeof(y) _y = (y); (void)(&_x == &_y); _x > _y ? _x : _y; })
+ 
+int socket_fd;
+struct sockaddr_un address;
 
 #define _DEBUG_
 int cIsDebug = 1; /* debug switch */ 
@@ -50,6 +57,7 @@ char* str_timemark = "1408001801550";
 
 pthread_mutex_t prmutex;
 void *thr_fn(void* arg);
+void *rcv_fn(void* arg);
 
 static char Defualtdata[] = "yy-mm-dd/hh:mm";
 char* serial2date(char* serialNo)
@@ -123,7 +131,9 @@ void payment_alarm_handler(int sig) {
     struct tm *ptr;
     time_t td;
     char pos_date[12];
-    char pos_time[12];    
+    char pos_time[12]; 
+    
+    //int socket_fd;   
     
 
 
@@ -161,13 +171,13 @@ void payment_alarm_handler(int sig) {
     else
        DebugErrorInfo("NO time_mark return from server!\n");
     if(payquery_result.order[0]){
-#if 0    	
-    struct sockaddr_un address;
+#if 1    	
+    //struct sockaddr_un address;
 
     socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
     if(socket_fd < 0)
     {
-        printf("socket() failed\n");
+        DebugErrorInfo("socket() failed\n");
         alarm(10);
         return ;
     }
@@ -180,15 +190,16 @@ void payment_alarm_handler(int sig) {
             (struct sockaddr *) &address, 
             sizeof(struct sockaddr_un)) != 0)
     {
-        printf("connect() failed\n");
+        DebugErrorInfo("connect() failed\n");
         alarm(10);
         return ;
     }
     
-    nbytes = strlen(payquery_result.qr_string);
-    write(socket_fd, payquery_result.qr_string, nbytes);
+    nbytes = strlen(payquery_result.order);
+    write(socket_fd, payquery_result.order, nbytes);
     close(socket_fd);
-#endif    
+#endif 
+#if 0   
     printf("MESSAGE FROM ALIPAY: %s\n", payquery_result.order);
     //nbytes = snprintf(buffer, 256, "hello from the server");
     //write(connection_fd, buffer, nbytes);
@@ -319,7 +330,7 @@ end2:
         goto START_PRINT;  
     
     }
-
+#endif
 
 
     query_count = 0;
@@ -354,9 +365,14 @@ int main(void)
     char szTmpBuf[30];
     int ucKey;
     int ret = 0;
+    int newpid;
+    const char *fifo_name = "/tmp/alipay_fifo";
+    int pipe_fd = -1;
+    int res = 0;
+    int open_mode = O_RDONLY | O_NONBLOCK;
     
     int err;
-    pthread_t ntid;
+    pthread_t ntid,rtid;
     sigset_t sigset;
     
     struct sigaction act_handler;
@@ -548,42 +564,129 @@ int main(void)
     }
 #endif
 	  
-	  
-    /* process alarm signal callback in main loop */
-    act_handler.sa_handler = payment_alarm_handler;
-    act_handler.sa_flags = 0;
-    sigemptyset(&act_handler.sa_mask);
-    sigaction(SIGALRM, &act_handler, NULL);
-    
-               
-    //pthread_mutex_init(&prmutex, NULL);
-          
-           
-    ret = NDK_AppGetInfo(NULL,0,&PayAppInfo, sizeof(PayAppInfo));
-    if (ret == NDK_OK){
-    	  DebugErrorInfo("Get Info OK,name: %s,nSeriNo is %d\n",PayAppInfo.szAppName,PayAppInfo.nSeriNo);
-    }
-    else{
-    	  DebugErrorInfo("Get Info FAIL,ret=%d\n",ret);	
-    }	
-
-
 	  getIMSIconfig();
     if(jfkey[0] == 0 && getPosKey() > 0){
     	DebugErrorInfo("Get POS KEY Error from thr_fn!\n");
       return 1;
 	  }
 	  strcpy(qrpay_info.imsi, pos_imsi);
-	  strcpy(qrpay_info.order_key, jfkey);
-    
-    query_count = 5;        
-    alarm(10); 
+	  strcpy(qrpay_info.order_key, jfkey);	  
 
- 
+
+    if( (newpid = fork()) == -1)
+    	  DebugErrorInfo("fork() error\n");
+    else if( newpid == 0){
+        /* process alarm signal callback in main loop */
+        act_handler.sa_handler = payment_alarm_handler;
+        act_handler.sa_flags = 0;
+        sigemptyset(&act_handler.sa_mask);
+        sigaction(SIGALRM, &act_handler, NULL);
+        
+                   
+        //pthread_mutex_init(&prmutex, NULL);
+              
+               
+        ret = NDK_AppGetInfo(NULL,0,&PayAppInfo, sizeof(PayAppInfo));
+        if (ret == NDK_OK){
+        	  DebugErrorInfo("Get Info OK,name: %s,nSeriNo is %d\n",PayAppInfo.szAppName,PayAppInfo.nSeriNo);
+        }
+        else{
+        	  DebugErrorInfo("Get Info FAIL,ret=%d\n",ret);	
+        }	
+                
+        query_count = 5;        
+        alarm(10);  
+        
+
+        if(access(fifo_name, F_OK) == -1)  
+        {  
+            //管道文件不存在  
+            //创建命名管道  
+            res = mkfifo(fifo_name, 0777);  
+            if(res != 0)  
+            {  
+                DebugErrorInfo("QUERY:Could not create fifo %s\n", fifo_name);  
+                return 1;  
+            }  
+        } 
+        pipe_fd = open(fifo_name, open_mode);
+        if (pipe_fd == -1) {
+            DebugErrorInfo("Couldn't Open /tmp/ALIPAY_FIFO!\n");
+            return 1;
+        }
+
+        while(1)
+    	  {
+             memset(buffer, 0, 30);
+             nbytes = read(pipe_fd, buffer, 30);
+             if(nbytes > 0 || strncmp(buffer,"START",5) == 0) {
+                 DebugErrorInfo("Get START Trigger From Main Server!\n"); 
+                 query_count = 60;
+                 alarm(10);
+             }
+             //pause();
+
+    	  }           	
+    }
+    else{
+
+
+    socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
+    if(socket_fd < 0)
+    {
+        printf("socket() failed\n");
+        return 1;
+    }
+
+    unlink("/tmp/demo_socket");
+
+    /* start from a clean socket structure */
+    memset(&address, 0, sizeof(struct sockaddr_un));
+
+    address.sun_family = AF_UNIX;
+    snprintf(address.sun_path, 20/*UNIX_PATH_MAX*/, "/tmp/demo_socket");
+
+    if(bind(socket_fd,
+         (struct sockaddr *) &address,
+         sizeof(struct sockaddr_un)) != 0)
+    {
+        printf("bind() failed\n");
+        return 1;
+    }
+
+    if(listen(socket_fd, 5) != 0)
+    {
+        printf("listen() failed\n");
+        return 1;
+    }
+   	
+    open_mode = O_WRONLY;	
+    if(access(fifo_name, F_OK) == -1)  
+    {  
+        //管道文件不存在  
+        //创建命名管道  
+        res = mkfifo(fifo_name, 0777);  
+        if(res != 0)  
+        {  
+            DebugErrorInfo("APP: Could not create fifo %s\n", fifo_name);  
+            return 1;  
+        }  
+    }  
+    pipe_fd = open(fifo_name, open_mode); 
+    if (pipe_fd == -1) {
+        DebugErrorInfo("APP: Couldn't open /tmp/alipay_fifo\n");
+        return 1;
+    }
+    
+    err = pthread_create(&rtid, NULL, rcv_fn, NULL);
+    
+    if(err != 0)
+    DebugErrorInfo("!!!! receive thread create failure-----\n");
+        	 	  
     while(1)
     {
     	  NDK_ScrClrs();
-    	  //NDK_ScrStatusbar(STATUSBAR_DISP_ALL|STATUSBAR_POSITION_TOP);
+    	  NDK_ScrStatusbar(STATUSBAR_DISP_ALL|STATUSBAR_POSITION_TOP);
     	  NDK_ScrDispString(40,0,"盈润捷通",0);
     	  NDK_ScrDispString(4,12,"1.支付宝",0);
     	  NDK_ScrDispString(4,24,"2.逐单查询",0);
@@ -638,6 +741,8 @@ int main(void)
                       DebugErrorInfo("!!!! query thread create failure-----\n");
 			    	          DebugErrorInfo("We just switch KEY ONE,NOTHING!\n");
 				        	  	
+				        	  	write(pipe_fd, "START", 6);
+				        	  	
 				        	  	break;
 				        }	
 				    break;
@@ -683,7 +788,7 @@ int main(void)
 		     //pause();
         
     };
-    
+    }
 end:    
     /* close the serial port 1 */
     ret = NDK_PortClose(PORT_NUM_COM1);   
@@ -695,6 +800,8 @@ end:
     }	 
     NDK_ScrRefresh();
     ret = NDK_PppHangup(1);
+    close(pipe_fd);
+    unlink("/tmp/demo_socket");
     NDK_ScrClrs();
     if (ret == NDK_OK){
     	  NDK_ScrPrintf("PPP Dial Close OK!\n");
@@ -1171,7 +1278,190 @@ end2:
                                                                                                         
     return ret;                                                                                          
  }
- 
+
+void *rcv_fn(void *arg)
+{
+	  //int socket_fd;
+    //struct sockaddr_un address;
+    int connection_fd;
+    socklen_t address_length;
+    int ret = 0;
+
+    fd_set rset;
+    struct timeval tv;
+    int retval;
+    int i;
+
+    struct qr_result payquery_result;
+    int nbytes,ucKey;
+    EM_PRN_STATUS PrnStatus;
+    
+    char buffer[QRRESULTSTR];
+    int trade_num;
+    char *trade_ptr[100] = {NULL}; 
+    char *trade_detail[5] = {NULL}; 
+    struct receipt_info pos_receipt;
+    char PrintBuff[30];
+    //T_DATETIME tTime;    
+    struct tm *ptr;
+    time_t td;
+    char pos_date[12];
+    char pos_time[12]; 
+
+
+    int maxfd = 0;
+    if(socket_fd != 0)
+        maxfd = max(maxfd,socket_fd);
+
+    while(1) {
+        FD_ZERO(&rset);
+        FD_SET(socket_fd, &rset);
+        address_length = sizeof(address);
+
+        /* Wait up to one seconds. */
+        tv.tv_sec = 1;
+        tv.tv_usec = 0; 
+        retval = select(maxfd+1, &rset, NULL, NULL, &tv);
+        //retval = select(maxfd+1, &rset, NULL, NULL, NULL);
+        //DebugErrorInfo("select got return,go before FD_ISSET-----\n");  
+        if(FD_ISSET(socket_fd, &rset)) {
+            if ((connection_fd = accept(socket_fd,
+                            (struct sockaddr *) &address,
+                            &address_length)) > -1)
+            {
+            	  nbytes = read(connection_fd, buffer, QRRESULTSTR);
+            	  buffer[nbytes] = 0;
+            	  
+            	  DebugErrorInfo("MESSAGE FROM ALIPAY: %s\n", buffer);
+            	  trade_num = SplitStr(buffer,trade_ptr,"|");
+
+                /* get system time */
+                time(&td);
+                ptr = localtime(&td);
+                strftime(pos_date,sizeof(pos_date),"%Y-%m-%d",ptr);
+                strftime(pos_time,sizeof(pos_time),"%H:%M:%S",ptr);
+            
+            
+                for (i=0; i<trade_num; i++){
+                    DebugErrorInfo("number %d trade:%s\n",i,trade_ptr[i]);
+                    SplitStr(trade_ptr[i],trade_detail,",");
+                    memset(pos_receipt.serial_number,0,24);
+                    memset(pos_receipt.out_trade_no,0,16);
+                    memset(pos_receipt.trade_no,0,32);
+                    memset(pos_receipt.total_fee,0,16);
+            
+                    strcpy(pos_receipt.serial_number,trade_detail[0]);
+                    strcpy(pos_receipt.out_trade_no,trade_detail[1]);
+                    strcpy(pos_receipt.trade_no,trade_detail[2]);
+                    strcpy(pos_receipt.total_fee,trade_detail[3]);
+                    ///WritePayment(1, &pos_receipt);
+                    /// write(tty_data.posfd,"\n",1);
+                    ///write(tty_data.posfd,"\n",1);
+                    //pthread_mutex_lock(&prmutex);
+            START_PRINT:
+                    if(ret = NDK_PrnInit(0) != NDK_OK) {                                                                                                                                                                                                                                                                                                
+                        DebugErrorInfo("the printer is not working well!\n");                                                                                                                                                                                                                                                                            
+                        goto end1;                                                                                                                                                                                                                                                                                                               
+                    } 
+                    
+            
+                    memset(PrintBuff,0,30);
+            
+                    NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
+                    strcpy(PrintBuff,"支付宝交易凭条");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr("\n\n\n");
+            
+                    strcpy(PrintBuff,"序列号：\n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr(pos_receipt.serial_number);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"商户订单号：\n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr(pos_receipt.out_trade_no);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"日期：\n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr(pos_date);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"时间：\n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr(pos_time);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"-------------------\n");
+                    NDK_PrnStr(PrintBuff);	   
+            
+                    strcpy(PrintBuff,"支付宝当面付\n");
+                    NDK_PrnStr(PrintBuff);	   
+            
+                    strcpy(PrintBuff,"交易号：\n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr(pos_receipt.trade_no);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"金额：\n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr(pos_receipt.total_fee);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"签名 \n");
+                    NDK_PrnStr(PrintBuff);
+                    NDK_PrnStr("\n");
+            
+                    strcpy(PrintBuff,"本人同意上述交易\n");
+                    NDK_PrnStr(PrintBuff);
+            
+                    //NDK_PrnStr("\n\n\n");
+            	 
+            
+                    //开始打印            
+                    ret = NDK_PrnStart(); 
+                    //pthread_mutex_unlock(&prmutex);                                                                                                                                                                                                                                                                                                                                   
+                    DebugErrorInfo("print error code:[%d]\n", ret);                                                                                                                                                                                                                                                                                                             
+                    if(ret != NDK_OK)                                                                                                                                                                                                                                                                                                                                          
+                    {                                                                                                                                                                                                                                                                                                                                                     
+                        NDK_PrnGetStatus(&PrnStatus);
+                        if(PrnStatus & PRN_STATUS_BUSY)                                                                                                                                                                                                                                                                                                                           
+                            goto START_PRINT;                                                                                                                                                                                                                                                                                                                             
+                        else if(PrnStatus & PRN_STATUS_VOLERR)                                                                                                                                                                                                                                                                                                                        
+                            goto end2;                                                                                                                                                                                                                                                                                                                                    
+                        else if(PrnStatus & PRN_STATUS_NOPAPER || PrnStatus & PRN_STATUS_OVERHEAT)                                                                                                                                                                                                                                                                                                                         
+                            goto end1;                                                                                                                                                                                                                                                                                                                                    
+                    } 
+                    NDK_PrnFeedPaper(PRN_FEEDPAPER_AFTER); 
+                    continue;
+            end1:
+            
+                    NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                    NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                    NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+                    NDK_ScrDispString(36, 36, "打印失败", 0); 
+                    NDK_ScrRefresh(); 
+                    NDK_KbGetCode(0, &ucKey);
+            
+            
+                    goto START_PRINT;
+            end2:
+            
+                    NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                    NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                    NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+                    NDK_ScrDispString(24, 36, "无法执行打印",0); 
+                    NDK_ScrRefresh(); 
+                    NDK_KbGetCode(0, &ucKey);
+                    goto START_PRINT;  
+                
+                }
+                close(connection_fd);
+            }	        	
+        }	  	
+    }	
+    return;    	
+}	 
 #if 0 	                                                                                                 
 //user don't need to input imsi and year month date, but hour,minutes,and serial no is needed,
 void getSNoPre(char* prefix_str)
