@@ -111,13 +111,15 @@ int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int 
         if(res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));
-            DebugErrorInfo(stderr, "curl_easy_perform() failed: %s\n",
+            DebugErrorInfo("curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));        
         } else if (state.ok) {
             /* Expat requires one final call to finalize parsing. */
             if (XML_Parse(parser, NULL, 0, 1) == 0) {
                 int error_code = XML_GetErrorCode(parser);
                 fprintf(stderr, "Finalizing parsing failed with error code %d (%s).\n",
+                        error_code, XML_ErrorString(error_code));
+                DebugErrorInfo("Finalizing parsing failed with error code %d (%s).\n",
                         error_code, XML_ErrorString(error_code));
             }
             else {
