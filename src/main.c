@@ -158,6 +158,7 @@ void payment_alarm_handler(int sig) {
        strcpy(time_mark, payquery_result.time_mark);
        DebugErrorInfo("query parameter: new time_mark is %s\n",time_mark);
        alarm(10);
+       NDK_SysSetSuspend(0);
        return;
     }
 #endif
@@ -182,6 +183,7 @@ void payment_alarm_handler(int sig) {
     {
         DebugErrorInfo("socket() failed\n");
         alarm(10);
+        NDK_SysSetSuspend(0);
         return ;
     }
     /* 从一个干净的地址结构开始 */ 
@@ -195,6 +197,7 @@ void payment_alarm_handler(int sig) {
     {
         DebugErrorInfo("connect() failed\n");
         alarm(10);
+        NDK_SysSetSuspend(0);
         return ;
     }
     
@@ -344,12 +347,16 @@ end2:
     }
 
     query_count--;
-    if(query_count > 0)
+    if(query_count > 0) {
         alarm(10);
+        NDK_SysSetSuspend(0);
+    }    
     else {
 
         DebugErrorInfo("The query_server alarm timer is stopped!\n");
         alarm(0);
+        NDK_SysSetSuspend(1);
+        NDK_SysGoSuspend();
     }
    
 }
@@ -397,7 +404,7 @@ int main(void)
 
           	  
     /* disable auto suspend */
-    NDK_SysSetSuspend(0);
+    //NDK_SysSetSuspend(0);
     
     /*初始化应用界面*/
     if(NDK_ScrInitGui()!=NDK_OK)
@@ -609,6 +616,7 @@ int main(void)
                 
         query_count = 5;        
         alarm(10);  
+        NDK_SysSetSuspend(0);
         
 
         if(access(fifo_name, F_OK) == -1)  
@@ -636,6 +644,7 @@ int main(void)
                  DebugErrorInfo("Get START Trigger From Main Server!\n"); 
                  query_count = 60;
                  alarm(10);
+                 NDK_SysSetSuspend(0);
              }
              //pause();
 
@@ -730,7 +739,7 @@ int main(void)
     #endif        	
         }	  
         NDK_ScrRefresh();
-    	  NDK_KbGetCode(0, &ucKey);
+    	  NDK_KbGetCode(0, &ucKey);  
 
     NDK_PppCheck(&nStatus, &nErrCode);
     if(nStatus != PPP_STATUS_CONNECTED){ 
@@ -1349,10 +1358,10 @@ end2:
         printTail(total_fee,commTestOut.out_trade_no);
     }              
  	                                                                                                 
-    if(query_count == 0)                                                                                
-            alarm(10);                                                                                  
-    else                                                                                             
-       query_count = 10;                                                                                 
+//    if(query_count == 0)                                                                                
+//            alarm(10);                                                                                  
+//    else                                                                                             
+//       query_count = 10;                                                                                 
                                                                                                         
     return ret;                                                                                          
  }
@@ -1535,6 +1544,8 @@ void *rcv_fn(void *arg)
                 
                 }
                 close(connection_fd);
+                NDK_SysSetSuspend(1);
+                NDK_SysGoSuspend();
             }	        	
         }	  	
     }	
