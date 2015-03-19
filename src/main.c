@@ -865,12 +865,11 @@ int main(void)
           	setPosKey();
           	break;
 #endif
-          	  
-#ifdef RECEIPT_CONF            
+          	             
           case K_F3:
-            SetReceiptInfo();
-            break;
-#endif                      
+          	PaySettings();
+            //SetReceiptInfo();
+            break;                     
 		     }
 		     //pause();
         
@@ -2762,4 +2761,61 @@ int SetReceiptInfo()
 
         } //while
 }
-#endif                                                                                                                                                                                                                                                                                                                                                    
+#endif 
+
+int PaySettings()
+{
+	  int ret,ucKey;
+	  
+	  while(1)
+	  {
+        NDK_ScrClrs();
+        if(display_mode > 0) {
+            NDK_ScrDispString(width/2 - font_width,0,"设置",0);
+            
+            NDK_ScrDispString(12,48,"1.设备信息",0);    	         	      
+    	      NDK_ScrDispString(12,78,"2.小票设置",0);
+    	      
+    	  }
+    	  else 
+    	  {
+            NDK_ScrDispString(width/2 - font_width,0,"设置",0);
+            
+            NDK_ScrDispString(4,12,"1.设备信息",0);
+    	      NDK_ScrDispString(4,24,"2.小票设置",0);    	  		
+    	  }
+        NDK_ScrRefresh();
+        
+    	  NDK_KbGetCode(0, &ucKey);	
+    	  
+        switch(ucKey)
+        {
+        case K_ESC:
+        case K_BASP:
+              return 0;
+              break;
+        
+        case K_ONE:
+          getIMSIconfig();
+        	while(1)
+        	{
+        		//get imsi to display
+
+             NDK_ScrClrs();
+             NDK_ScrDispString(0, font_height, "IMSI:",0);
+             NDK_ScrDispString(0, font_height * 2, pos_imsi, 0);
+             NDK_ScrRefresh(); 
+              
+             NDK_KbGetCode(0, &ucKey);	
+             if(ucKey == K_ESC || ucKey == K_BASP)
+             	 break;      		
+        	}
+        	break;
+#ifdef  RECEIPT_CONF  	
+        case K_TWO:
+        	SetReceiptInfo();
+        	break;	
+#endif  
+        }   		    	    	
+	  }	
+}                                                                                                                                                                                                                                                                                                                                                   
