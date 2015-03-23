@@ -34,7 +34,7 @@
 int socket_fd;
 struct sockaddr_un address;
 
-#define _DEBUG_
+//#define _DEBUG_
 int cIsDebug = 1; /* debug switch */ 
 char result24h[QRRESULT] = {0};
 
@@ -356,7 +356,7 @@ end2:
         DebugErrorInfo("The query_server alarm timer is stopped!\n");
         alarm(0);
         NDK_SysSetSuspend(1);
-        NDK_SysGoSuspend();
+        //NDK_SysGoSuspend();
     }
    
 }
@@ -711,7 +711,8 @@ int main(void)
     	  NDK_ScrStatusbar(STATUSBAR_DISP_ALL|STATUSBAR_POSITION_TOP);
     	  if(display_mode > 0){
 
-    	  NDK_ScrDispString(112,0,"盈润捷通",0);
+    	  //NDK_ScrDispString(112,0,"盈润捷通",0);
+    	  NDK_ScrDispString(112,0,gRCP.rcp_tech_company,0);
     	  NDK_ScrDispString(12,48,"1.支付宝",0);
     	  NDK_ScrDispString(12,78,"2.逐单查询",0);
     	  NDK_ScrDispString(12,108,"3.日结",0);
@@ -725,7 +726,8 @@ int main(void)
     #endif
         }
         else{
-    	  NDK_ScrDispString(40,0,"盈润捷通",0);
+    	  //NDK_ScrDispString(40,0,"盈润捷通",0);
+    	  NDK_ScrDispString(40,0,gRCP.rcp_tech_company,0);
     	  NDK_ScrDispString(4,12,"1.支付宝",0);
     	  NDK_ScrDispString(4,24,"2.逐单查询",0);
     	  NDK_ScrDispString(4,36,"3.日结",0);
@@ -1264,14 +1266,17 @@ START_PRINT:
     NDK_PrnStr(printBuff);
     NDK_PrnStr("\n\n");
     NDK_PrnSetFont(PRN_HZ_FONT_24x24, PRN_ZM_FONT_12x24A);
-    strcpy(printBuff," 本产品由盈润捷通提供技术支持\n");
+    //strcpy(printBuff," 本产品由盈润捷通提供技术支持\n");
+    sprintf(printBuff," 本产品由%s提供技术支持\n",gRCP.rcp_tech_company);
     NDK_PrnStr(printBuff);
     NDK_PrnSetFont(PRN_HZ_FONT_24x24, PRN_ZM_FONT_12x24A);
-    strcpy(printBuff,"     联系电话：4008190900\n");
+    //strcpy(printBuff,"     联系电话：4008190900\n");
+    sprintf(printBuff,"     联系电话：%s\n",gRCP.rcp_tech_number);
     NDK_PrnStr(printBuff);
     strcpy(printBuff,"--------------------------------");
     NDK_PrnStr(printBuff);
-    strcpy(printBuff,"以下广告位招商电话：4008190900\n");
+    //strcpy(printBuff,"以下广告位招商电话：4008190900\n");
+    sprintf(printBuff,"以下广告位招商电话：%s\n",gRCP.rcp_tech_number);
     NDK_PrnStr(printBuff);
     NDK_PrnStr("\n");
 
@@ -1544,7 +1549,7 @@ void *rcv_fn(void *arg)
                 }
                 close(connection_fd);
                 NDK_SysSetSuspend(1);
-                NDK_SysGoSuspend();
+                //NDK_SysGoSuspend();
             }	        	
         }	  	
     }	
@@ -2387,6 +2392,8 @@ void InitReceipt()
         strcpy(gRCP.rcp_title_address,"          公司地址信息");
         strcpy(gRCP.rcp_title_number,"          公司电话信息");
         strcpy(gRCP.rcp_title_company,"公司名称"); 
+        strcpy(gRCP.rcp_tech_company,"盈润捷通");
+        strcpy(gRCP.rcp_tech_number,"4008190900");
                
         if( !fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fp) )
         {
@@ -2413,11 +2420,11 @@ int SetReceiptInfo()
         int ucKey;
         FILE *receipt_fb;
         
-        receipt_fb = fopen("test-receipt.dat", "r+");
-        if( receipt_fb == NULL){
-	   	      DebugErrorInfo("open test-receipt.dat to write failed!\n");
-	   	      return; 
-	      }
+//        receipt_fb = fopen("test-receipt.dat", "r+");
+//        if( receipt_fb == NULL){
+//	   	      DebugErrorInfo("open test-receipt.dat to write failed!\n");
+//	   	      return; 
+//	      }
         	
         while(1)
         {
@@ -2431,6 +2438,8 @@ int SetReceiptInfo()
     	      NDK_ScrDispString(12,108,"3.地址信息",0);
     	      NDK_ScrDispString(185,48,"4.电话信息",0);
     	      NDK_ScrDispString(185,78,"5.公司名称",0);
+    	      NDK_ScrDispString(185,108,"6.技术支持",0);
+    	      NDK_ScrDispString(185,138,"7.支持电话",0);
     	  }
     	  else 
     	  {
@@ -2440,7 +2449,8 @@ int SetReceiptInfo()
     	      NDK_ScrDispString(4,24,"2.标题2",0);
     	      NDK_ScrDispString(4,36,"3.地址信息",0);
     	      NDK_ScrDispString(66,12,"4.电话信息",0);
-    	      NDK_ScrDispString(66,24,"5.公司名称",0);    	  		
+    	      NDK_ScrDispString(66,24,"5.公司名称",0);
+    	      NDK_ScrDispString(66,36,"6.技术支持",0);    	  		
     	  }
         NDK_ScrRefresh();
         
@@ -2450,312 +2460,547 @@ int SetReceiptInfo()
         {
         case K_ESC:
         case K_BASP:
-        	    fclose(receipt_fb);
               return 0;
               break;
         
-        case K_ONE:  
-        while(1)
-        {
-             NDK_ScrClrs();
-             NDK_ScrDispString(0, 0, "请输入小票标题第一行:",0);
-             NDK_ScrRefresh();
-
-             //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
-             //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
-             //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
-             memset(buff, 0, sizeof(buff));
-             strcpy(buff, gRCP.rcp_title_line1);
-
-             //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
-             //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
-             //sprintf(buff, "%s", gRCP.rcp_title_line1);
-             //memcpy(buff,gRCP.rcp_title_line1,10);
-
-             //sprintf(buff, "%s", "12345");
-             //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
-             ret = NDK_KbHZInput(buff, 16, IME_NUMPY); 
-             if(ret != NDK_OK)
-             {
-                DebugErrorInfo("input ret=[%d]\n", ret); 
-                break;
-             }     
-             if(strlen(buff) == 0){
+        case K_ONE: 
+            receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }        	 
+            while(1)
+            {
                  NDK_ScrClrs();
-                 NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                 NDK_ScrDispString(0, 0, "请输入小票标题第一行:",0);
                  NDK_ScrRefresh();
-                 NDK_SysDelay(10);                 
-                 continue;
-             }
-
-
-             //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
-             //TextOut(0, 3, ALIGN_LEFT, buff);
-             strcpy(gRCP.rcp_title_line1,buff);
-
-             //NDK_KbGetCode(0, &ucKey);
-             if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
-             {                                                                                                                                                                                                                                                                                                                                                                     
-                  NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                  NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                  NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
-                  NDK_ScrRefresh(); 
-                  NDK_KbGetCode(2, &ucKey);
-                  goto FAILED;
-             }     
-	   	       //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-             NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-             NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
-             NDK_ScrRefresh(); 
-             NDK_KbGetCode(2, &ucKey);
-             break;   
-                                    
-        }
-        break;
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_title_line1);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 16, IME_NUMPY); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret); 
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_title_line1,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 break;   
+                                        
+            }
+            fclose(receipt_fb);
+            break;
         
         case K_TWO:
-        while(1)
-        {
-             NDK_ScrClrs();
-             NDK_ScrDispString(0, 0, "请输入小票标题第二行:",0);
-             NDK_ScrRefresh();
-
-             //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
-             //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
-             //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
-             memset(buff, 0, sizeof(buff));
-             strcpy(buff, gRCP.rcp_title_line2);
-             //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
-             //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
-             //sprintf(buff, "%s", gRCP.rcp_title_line1);
-             //memcpy(buff,gRCP.rcp_title_line1,10);
-
-             //sprintf(buff, "%s", "12345");
-             //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
-             //ret = NDK_KbHZInput(buff, 16, IME_NUMPY); 
-             ret = NDK_KbGetInput(buff, 0, 16, NULL, INPUTDISP_OTHER, 0, INPUT_CONTRL_NOLIMIT_ERETURN);
-
-             if(ret != NDK_OK)
-             {
-                DebugErrorInfo("input ret=[%d]\n", ret); 
-                break;
-             }     
-             if(strlen(buff) == 0){
+            receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }	
+            while(1)
+            {
                  NDK_ScrClrs();
-                 NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                 NDK_ScrDispString(0, 0, "请输入小票标题第二行:",0);
                  NDK_ScrRefresh();
-                 NDK_SysDelay(10);                 
-                 continue;
-             }
-
-
-             //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
-             //TextOut(0, 3, ALIGN_LEFT, buff);
-             strcpy(gRCP.rcp_title_line2,buff);
-
-             //NDK_KbGetCode(0, &ucKey);
-             if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
-             {                                                                                                                                                                                                                                                                                                                                                                     
-                  NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                  NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                  NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
-                  NDK_ScrRefresh(); 
-                  NDK_KbGetCode(2, &ucKey);
-                  goto FAILED;
-             }     
-	   	       //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-             NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-             NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
-             NDK_ScrRefresh(); 
-             NDK_KbGetCode(2, &ucKey);
-             break;   
-              
-        }
-        break;
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_title_line2);
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 16, IME_ENGLISH); 
+                 //ret = NDK_KbGetInput(buff, 0, 16, NULL, INPUTDISP_OTHER, 0, INPUT_CONTRL_NOLIMIT_ERETURN);
+            
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret);
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_title_line2,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 break;   
+                  
+            }
+            fclose(receipt_fb);
+            break;
         
 
         case K_THREE:
-        while(1)
-        {
-             NDK_ScrClrs();
-             NDK_ScrDispString(0, 0, "请输入小票上地址信息:",0);
-             NDK_ScrRefresh();
-
-             //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
-             //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
-             //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
-             memset(buff, 0, sizeof(buff));
-             strcpy(buff, gRCP.rcp_title_address);
-
-             //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
-             //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
-             //sprintf(buff, "%s", gRCP.rcp_title_line1);
-             //memcpy(buff,gRCP.rcp_title_line1,10);
-
-             //sprintf(buff, "%s", "12345");
-             //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
-             ret = NDK_KbHZInput(buff, 32, IME_NUMPY); 
-             if(ret != NDK_OK)
-             {
-                DebugErrorInfo("input ret=[%d]\n", ret); 
-                break;
-             }     
-             if(strlen(buff) == 0){
+        	  receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }	
+            while(1)
+            {
                  NDK_ScrClrs();
-                 NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                 NDK_ScrDispString(0, 0, "请输入小票上地址信息:",0);
                  NDK_ScrRefresh();
-                 NDK_SysDelay(10);                 
-                 continue;
-             }
-
-
-             //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
-             //TextOut(0, 3, ALIGN_LEFT, buff);
-             strcpy(gRCP.rcp_title_address,buff);
-
-             //NDK_KbGetCode(0, &ucKey);
-             if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
-             {                                                                                                                                                                                                                                                                                                                                                                     
-                  NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                  NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                  NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
-                  NDK_ScrRefresh(); 
-                  NDK_KbGetCode(2, &ucKey);
-                  goto FAILED;
-             }     
-	   	       //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-             NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-             NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
-             NDK_ScrRefresh(); 
-             NDK_KbGetCode(2, &ucKey);
-             break;
-              
-        }
-        break;
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_title_address);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 32, IME_NUMPY); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret);
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_title_address,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 break;
+                  
+            }
+            fclose(receipt_fb);
+            break;
         
         case K_FOUR:
-        while(1)
-        {
-
-             NDK_ScrClrs();
-             NDK_ScrDispString(0, 0, "请输入小票上电话信息:",0);
-             NDK_ScrRefresh();
-
-             //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
-             //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
-             //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
-             memset(buff, 0, sizeof(buff));
-             strcpy(buff, gRCP.rcp_title_number);
-
-             //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
-             //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
-             //sprintf(buff, "%s", gRCP.rcp_title_line1);
-             //memcpy(buff,gRCP.rcp_title_line1,10);
-
-             //sprintf(buff, "%s", "12345");
-             //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
-             ret = NDK_KbHZInput(buff, 32, IME_NUMPY|IME_NUM); 
-             if(ret != NDK_OK)
-             {
-                DebugErrorInfo("input ret=[%d]\n", ret); 
-                break;
-             }     
-             if(strlen(buff) == 0){
+        	  receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }	        	
+            while(1)
+            {
+            
                  NDK_ScrClrs();
-                 NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                 NDK_ScrDispString(0, 0, "请输入小票上电话信息:",0);
                  NDK_ScrRefresh();
-                 NDK_SysDelay(10);                 
-                 continue;
-             }
-
-
-             //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
-             //TextOut(0, 3, ALIGN_LEFT, buff);
-             strcpy(gRCP.rcp_title_number,buff);
-
-             //NDK_KbGetCode(0, &ucKey);
-             if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
-             {                                                                                                                                                                                                                                                                                                                                                                     
-                  NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                  NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                  NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
-                  NDK_ScrRefresh(); 
-                  NDK_KbGetCode(2, &ucKey);
-                  goto FAILED;
-             }     
-	   	       //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-             NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-             NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
-             NDK_ScrRefresh();
-             NDK_KbGetCode(2, &ucKey); 
-             break;             
-              
-        }
-        break; 
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_title_number);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 32, IME_NUMPY|IME_NUM); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret);
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_title_number,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh();
+                 NDK_KbGetCode(2, &ucKey); 
+                 break;             
+                  
+            }
+            fclose(receipt_fb);
+            break; 
 
        
-        case K_FIVE:  
-        while(1)
-        {
-
-             NDK_ScrClrs();
-             NDK_ScrDispString(0, 0, "请输入日结单上公司名称:",0);
-             NDK_ScrRefresh();
-
-             //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
-             //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
-             //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
-             memset(buff, 0, sizeof(buff));
-             strcpy(buff, gRCP.rcp_title_company);
-
-             //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
-             //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
-             //sprintf(buff, "%s", gRCP.rcp_title_line1);
-             //memcpy(buff,gRCP.rcp_title_line1,10);
-
-             //sprintf(buff, "%s", "12345");
-             //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
-             ret = NDK_KbHZInput(buff, 32, IME_NUMPY); 
-             if(ret != NDK_OK)
-             {
-                DebugErrorInfo("input ret=[%d]\n", ret); 
-                break;
-             }     
-             if(strlen(buff) == 0){
+        case K_FIVE: 
+        	  receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }	        	 
+            while(1)
+            {
+            
                  NDK_ScrClrs();
-                 NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                 NDK_ScrDispString(0, 0, "请输入日结单上公司名称:",0);
                  NDK_ScrRefresh();
-                 NDK_SysDelay(10);                 
-                 continue;
-             }
-
-
-             //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
-             //TextOut(0, 3, ALIGN_LEFT, buff);
-             strcpy(gRCP.rcp_title_company,buff);
-
-             //NDK_KbGetCode(0, &ucKey);
-             if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
-             {                                                                                                                                                                                                                                                                                                                                                                     
-                  NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                  NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                  NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
-                  NDK_ScrRefresh(); 
-                  NDK_KbGetCode(2, &ucKey);
-                  goto FAILED;
-             }     
-	   	       //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-             NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-             NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
-             NDK_ScrRefresh(); 
-             NDK_KbGetCode(2, &ucKey);
-             break;
-              
-        }
-        break; 
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_title_company);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 32, IME_NUMPY); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret);
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_title_company,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 break;
+                  
+            }
+            fclose(receipt_fb);
+            break;
+        
+         
+        case K_SIX:
+        	  receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }	        	  
+            while(1)
+            {
+            
+                 NDK_ScrClrs();
+                 NDK_ScrDispString(0, 0, "请输入技术支持公司简称:",0);
+                 NDK_ScrRefresh();
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_tech_company);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 8, IME_NUMPY); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret);               	
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_tech_company,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 
+                 
+                 if(display_mode == 0){
+                 	  fclose(receipt_fb);
+                 	  goto step1;
+                 }	  
+                 else
+                 	  break;	  
+                 	
+            step1:      
+	               //set number 
+	               receipt_fb = fopen("test-receipt.dat", "r+");
+                 if( receipt_fb == NULL){
+	   	               DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	               return; 
+	               }	            	
+                 NDK_ScrClrs();
+                 NDK_ScrDispString(0, 0, "请输入技术支持电话:",0);
+                 NDK_ScrRefresh();
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_tech_number);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 12, IME_NUM); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret); 
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10); 
+                     fclose(receipt_fb);                
+                     goto step1;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_tech_number,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }
+  
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 break;                          
+                 //end set number
+                  
+            }
+            fclose(receipt_fb);
+            break;   
+        
+        
+        case K_SEVEN:
+        	  receipt_fb = fopen("test-receipt.dat", "r+");
+            if( receipt_fb == NULL){
+	   	          DebugErrorInfo("open test-receipt.dat to write failed!\n");
+	   	          return; 
+	          }        	  
+            while(1)
+            {
+                 if(display_mode == 0)
+                 	   break;
+                 NDK_ScrClrs();
+                 NDK_ScrDispString(0, 0, "请输入技术支持电话:",0);
+                 NDK_ScrRefresh();
+            
+                 //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
+                 //TextOut(0, 6, ALIGN_CENTER, "按F1键切换输入法，#键在非中文输入法中代表空格");
+                 //TextOut(0, 7, ALIGN_CENTER, "0键切换大小写，多组拼音时，用*和#键来上下选择");
+                 memset(buff, 0, sizeof(buff));
+                 strcpy(buff, gRCP.rcp_tech_number);
+            
+                 //TextOut(4, 9, ALIGN_LEFT, "原小票标题：");
+                 //TextOut(14, 9, ALIGN_LEFT, gRCP.rcp_title_line1);
+                 //sprintf(buff, "%s", gRCP.rcp_title_line1);
+                 //memcpy(buff,gRCP.rcp_title_line1,10);
+            
+                 //sprintf(buff, "%s", "12345");
+                 //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
+                 ret = NDK_KbHZInput(buff, 12, IME_NUM); 
+                 if(ret != NDK_OK)
+                 {
+                    DebugErrorInfo("input ret=[%d]\n", ret); 
+                    break;
+                 }     
+                 if(strlen(buff) == 0){
+                     NDK_ScrClrs();
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     NDK_ScrRefresh();
+                     NDK_SysDelay(10);                 
+                     continue;
+                 }
+            
+            
+                 //TextOut(0, 1, ALIGN_LEFT, "输入内容如下:");
+                 //TextOut(0, 3, ALIGN_LEFT, buff);
+                 strcpy(gRCP.rcp_tech_number,buff);
+            
+                 //NDK_KbGetCode(0, &ucKey);
+                 if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
+                 {                                                                                                                                                                                                                                                                                                                                                                     
+                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrRefresh(); 
+                      NDK_KbGetCode(2, &ucKey);
+                      goto FAILED;
+                 }     
+	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
+                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrRefresh(); 
+                 NDK_KbGetCode(2, &ucKey);
+                 break;
+                  
+            }
+            fclose(receipt_fb);
+            break;             
  FAILED:
         memset(&gRCP, 0, sizeof(T_RECEIPT));
         fread(&gRCP,sizeof(T_RECEIPT), 1, receipt_fb);
+        fclose(receipt_fb);
         break;
         } //switch
 

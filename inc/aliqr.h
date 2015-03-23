@@ -123,7 +123,9 @@ typedef struct
        char rcp_title_line2[16+1];      // 小票标题第二行，汉字最多8个，数字，英文最多16个
        char rcp_title_address[32+1];    // 小票标题地址，汉字最多16个，数字，英文最多32个
        char rcp_title_number[32+1];     // 小票标题电话，汉字最多16个，数字，英文最多32个
-       char rcp_title_company[32+1];    // 小票标题电话，汉字最多16个，数字，英文最多32个
+       char rcp_title_company[32+1];    // 小票标题公司，汉字最多16个，数字，英文最多32个
+       char rcp_tech_company[8+1];      // 小票支持公司，汉字最多4个，数字，英文最多8个
+       char rcp_tech_number[12+1];      // 小票支持电话，汉字最多6个，数字，英文最多12个
 }T_RECEIPT;
 
 void InitReceipt();
