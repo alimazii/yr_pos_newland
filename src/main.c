@@ -34,7 +34,7 @@
 int socket_fd;
 struct sockaddr_un address;
 
-//#define _DEBUG_
+#define _DEBUG_
 int cIsDebug = 1; /* debug switch */ 
 char result24h[QRRESULT] = {0};
 
@@ -380,6 +380,7 @@ int main(void)
     int open_mode = O_RDONLY | O_NONBLOCK;
     
     int err;
+    unsigned int retry_times = 5;
     pthread_t ntid,rtid;
     sigset_t sigset;
     
@@ -509,11 +510,34 @@ int main(void)
     strcpy(PPPDialCfg.szDailNum,"*99***1#");
     NDK_PppSetCfg(&PPPDialCfg, sizeof(PPPDialCfg));
     ret = NDK_PppDial("card","card");
+    
     while(1){
         if (ret == NDK_OK){
         	  
-        	  DebugErrorInfo("PPP Dial Function Called\n");
-        	  break;
+        	  DebugErrorInfo("PPP Dialing in progress...\n");
+        	  NDK_PppCheck(&nStatus, &nErrCode);
+        	  NDK_ScrClrs();
+            if (nStatus==PPP_STATUS_DISCONNECT) {
+            	  retry_times--;
+            	  if(retry_times > 0){
+            	  	  DebugErrorInfo("PPP Dial Function Called\n");
+            	  	  ret = NDK_PppDial("card","card"); 
+            	  	  continue;
+            	  }	            	  	
+                NDK_ScrPrintf("²¦ºÅÊ§°Ü,ÇëÈ·±£SIM¿¨ÒÑ²åÈë»ò¿¨ÄÚÓà¶î³ä×ã\n");
+                NDK_ScrRefresh();
+                NDK_KbGetCode(0,&ucKey);
+                goto end;
+            } else if (nStatus==PPP_STATUS_CONNECTED) {            
+                NDK_ScrPrintf("²¦ºÅ³É¹¦\n");
+                NDK_ScrRefresh();
+                NDK_KbGetCode(2,&ucKey);
+                break;
+            } else {
+                NDK_ScrPrintf("ÕýÔÚ²¦ºÅ...\n");
+                NDK_ScrRefresh();
+                NDK_KbGetCode(1,&ucKey);
+            }
         }
         else{
         	  
@@ -527,28 +551,25 @@ int main(void)
         }
     }  
     
-    while(1){ 
-        NDK_PppCheck(&nStatus, &nErrCode);
-        NDK_ScrClrs();
-        if (nStatus==PPP_STATUS_DISCONNECT) {
-            NDK_ScrPrintf("²¦ºÅÊ§°Ü,ÇëÈ·±£SIM¿¨ÒÑ²åÈë»ò¿¨ÄÚÓà¶î³ä×ã\n");
-            NDK_ScrRefresh();
-            NDK_KbGetCode(0,&ucKey);
-            goto end;
-        } else if (nStatus==PPP_STATUS_CONNECTED) {            
-            NDK_ScrPrintf("²¦ºÅ³É¹¦\n");
-            NDK_ScrRefresh();
-            NDK_KbGetCode(2,&ucKey);
-            break;
-        } else {
-            NDK_ScrPrintf("ÕýÔÚ²¦ºÅ...\n");
-            NDK_ScrRefresh();
-            NDK_KbGetCode(1,&ucKey);
-//            if(NDK_KbGetCode(1,&ucKey)==NDK_OK && ucKey==K_ESC) {
-//                goto end;
-//            }
-        }
-    }
+//    while(1){ 
+//        NDK_PppCheck(&nStatus, &nErrCode);
+//        NDK_ScrClrs();
+//        if (nStatus==PPP_STATUS_DISCONNECT) {
+//            NDK_ScrPrintf("²¦ºÅÊ§°Ü,ÇëÈ·±£SIM¿¨ÒÑ²åÈë»ò¿¨ÄÚÓà¶î³ä×ã\n");
+//            NDK_ScrRefresh();
+//            NDK_KbGetCode(0,&ucKey);
+//            goto end;
+//        } else if (nStatus==PPP_STATUS_CONNECTED) {            
+//            NDK_ScrPrintf("²¦ºÅ³É¹¦\n");
+//            NDK_ScrRefresh();
+//            NDK_KbGetCode(2,&ucKey);
+//            break;
+//        } else {
+//            NDK_ScrPrintf("ÕýÔÚ²¦ºÅ...\n");
+//            NDK_ScrRefresh();
+//            NDK_KbGetCode(1,&ucKey);
+//        }
+//    }
 #if 0     
     NDK_ScrClrs();    
     NDK_ScrGetVer(dispVer);
@@ -590,8 +611,7 @@ int main(void)
         
 
     }
-#endif
-	  
+#endif	
 	  getIMSIconfig();
     if(jfkey[0] == 0 && getPosKey() > 0){
     	DebugErrorInfo("Get POS KEY Error from thr_fn!\n");
