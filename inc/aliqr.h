@@ -17,6 +17,9 @@ struct payInfo {
     char time_mark[14+1]; // for query with time_mark
     char take_out_phone[30]; // for take out 
 #endif
+#ifdef BARCODE_EN
+    char dynamic_id[18+1]; //payment id
+#endif
 #if 0
     char *imsi;
     char *order_key;
@@ -69,6 +72,9 @@ struct qr_result {
 #define POSTTEMPLATE        "http://"ALISER":80/qrcode/template/?"
 #define POSTLATESTMD5       "http://"ALISER":80/qrcode/lastest/md5/?"
 #define POSTLATEST          "http://"ALISER":80/qrcode/lastest/?"
+#ifdef  BARCODE_EN
+#define CREATEANDPAY        "http://182.92.8.2:8080/qrcode/createandpay/?"
+#endif
 
 #if 1
 #define PREORDER "i=%s&ot=%s&sj=%s&sn=%lld&tf=%s", order_info->imsi, order_info->order_time,order_info->order_subject, order_info->order_number, order_info->total_fee
@@ -84,6 +90,9 @@ struct qr_result {
 #else
 #define PREREFUND "i=%s&sn=%lld", order_info->imsi, order_info->order_number
 #endif
+#ifdef BARCODE_EN
+#define PRECREATE "di=%s&i=%s&ot=%s&sj=%s&sn=%lld&tf=%s", order_info->dynamic_id, order_info->imsi, order_info->order_time,order_info->order_subject, order_info->order_number, order_info->total_fee
+#endif
 
 enum precreate_type {
     ALI_PREORDER = 0, /* require an online order qrcode from alipay */
@@ -98,6 +107,9 @@ enum precreate_type {
     ALI_TEMPLATE,
     ALI_LASTESTMD5,
     ALI_LASTEST,
+#ifdef BARCODE_EN    
+    ALI_CREATEANDPAY
+#endif    
 };
 struct receipt_info {
     char serial_number[24];

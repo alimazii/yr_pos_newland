@@ -454,3 +454,83 @@ int setPosKey()
         return 0;			   
 }
 #endif
+
+#ifdef BARCODE_EN
+int create_and_pay(void* gout, char* price, char* dynamic_id ,void* gin)
+{
+    DataInfo qrDataInfo;
+    	
+    // code from d620d start
+    int ret;
+    struct qr_result* out = (struct qr_result*)gout; 
+    struct payInfo* in = (struct payInfo*)gin; 
+    // code from d620d end
+
+    int i;
+
+    struct tm *ptr;
+    time_t td;
+    char ticket_number[13] = {0};
+    char client_number[21] = {0};
+    char order_time[15] = {0};
+    client_number[0] = '1';//to avoid 0 atoi bug
+    DebugErrorInfo("Get Before getIMSIconfig\n");
+    getIMSIconfig();
+    if(jfkey[0] == 0 && getPosKey() > 0)
+         return 1;
+    strcpy(qrpay_info.order_key,jfkey);
+
+    /* Time for Normal Platform */
+    time(&td);
+    ptr = (struct tm *)localtime(&td);
+    //if(query_number == 0) { //if query_number != 0 then time will nto changed, bug
+        strftime(ticket_number,sizeof(ticket_number),"%y%m%d%H%M00",ptr);
+        //sprintf(ticket_number,"%s%s%s%s%s00","14","10","10","10","10");
+        /* use last 4-bit of IMSI */
+        strncpy(client_number+1, &(qrpay_info.imsi[11]), 5);
+        strcat(client_number, ticket_number);       
+        query_number = (unsigned long long)atoll(client_number);
+        if(old_query_number == query_number/100 ) {
+            query_number = query_number + query_number_idx;
+            query_number_idx++;
+        } else {
+            query_number_idx = 1;
+            old_query_number = query_number/100; 
+        }
+    //}
+    qrpay_info.order_number = query_number;    
+
+    strcpy(qrpay_info.total_fee,price);
+    strcpy(qrpay_info.dynamic_id,dynamic_id);
+    //strcpy(qrpay_info.total_fee,"0.01");^M
+    //strcpy(qrpay_info.order_subject,"ccc");
+    memset(qrpay_info.order_subject,0, sizeof(qrpay_info.order_subject));
+    if(in && strlen(in->order_subject) > 0)
+        strcpy(qrpay_info.order_subject,in->order_subject);
+#if 0        
+    else {
+        int subjectlen = 0;
+        subjectlen = getsubject("/usr/local/D620D/subject.txt",subject);
+        if(subjectlen > 0 ) {
+            printf("subject:%d:%s",subjectlen,subject);
+            strncpy(qrpay_info.order_subject,subject,subjectlen);
+        }else{
+            strcpy(qrpay_info.order_subject,defaultsubject);
+        }
+    }
+#endif
+    else    
+    	  strcpy(qrpay_info.order_subject,defaultsubject); /* temp solution for newland */
+    strftime(ticket_number,sizeof(ticket_number),"%Y%m%d%H%M00",ptr);
+    sprintf(qrpay_info.order_subject,"1678-%s",ticket_number);
+
+
+    strftime(order_time,sizeof(order_time),"%Y%m%d%H%M%S",ptr);        
+    strcpy(qrpay_info.order_time,order_time);
+
+    /* print the qr code from alipay */
+    DebugErrorInfo("Get Before alipay_main,imsi is %s\n",qrpay_info.imsi);
+    alipay_main(out, &qrpay_info, ALI_CREATEANDPAY);
+    return 0;	
+}	
+#endif
