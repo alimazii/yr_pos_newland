@@ -34,7 +34,7 @@
 int socket_fd;
 struct sockaddr_un address;
 
-#define _DEBUG_
+//#define _DEBUG_
 int cIsDebug = 1; /* debug switch */ 
 char result24h[QRRESULT] = {0};
 
@@ -392,6 +392,7 @@ int main(void)
 #ifdef NLSCAN_EN    
     int nbytes;
     char buffer[128]; 
+    char numBuf[10];    /* for money input */
     
 #else
     int nbytes;
@@ -426,7 +427,7 @@ int main(void)
         //return -1;
     NDK_ScrClrs();
 
-#ifdef NLSCAN_EN
+#ifdef BARCODE_EN
     /* use serial port one for 1D Barcode Scanner */
     /* Serial Port Connection: Female to Female, 5<->5, 2<->3, 3<->2 */
     /* Port Configure: 9600-8-"No Parity"-"1 Stop Bit" */
@@ -451,7 +452,7 @@ int main(void)
     	
     /* for newland scan */
    
-    memset(buffer, 128, 0);
+    memset(buffer, 0, sizeof(buffer));
 
     ret = NDK_PortRead(PORT_NUM_COM1, 128, buffer, 500, &nbytes); 
     
@@ -903,7 +904,7 @@ int main(void)
 #endif
 #ifdef BARCODE_EN            
           case K_SIX:
-          	barcodePay();
+          	barcodePay(pipe_fd);
           	break;
 #endif          	             
           case K_F3:
@@ -3109,9 +3110,10 @@ int PaySettings()
 }   
 
 #ifdef BARCODE_EN
-void barcodePay(void)
+void barcodePay(int pipe_id)
 {
     int ret = 0, ucKey;
+    int nbytes = 0;
     EM_PRN_STATUS PrnStatus;
     //T_DATETIME tTime;
     struct tm *ptr;
@@ -3158,14 +3160,41 @@ void barcodePay(void)
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
-         
+    
+    
+    while(1){
+    	   
+        memset(buff, 0, sizeof(buff));
+        nbytes = 0;
+        ret = NDK_PortRead(PORT_NUM_COM1, 18, buff, 500, &nbytes); 
+        
+        if (ret == NDK_OK && nbytes == 18){
+            NDK_ScrClrs();
+            buff[18] = '\0';
+
+            NDK_ScrPrintf("  付款码读取成功\n");
+            NDK_ScrPrintf("Number:%s\n",buff);            
+            NDK_ScrRefresh();
+            break;
+        
+        }
+        else{
+        	  NDK_ScrClrs();
+        	  NDK_ScrDispString(font_width * 2, line_height, "正在读取中...\n",0);
+        	  NDK_ScrRefresh();	
+        }    
+    }
+  
+
+#if 0         
     ret = NDK_KbGetInput(buff, 18, 18, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN); 
     
     if(ret != NDK_OK)
     {
        DebugErrorInfo("input ret=[%d]\n", ret); 
        return;
-    }     
+    }
+#endif         
 //    if(strlen(buff) == 0){
 //        NDK_ScrClrs();
 //        NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
@@ -3176,7 +3205,20 @@ void barcodePay(void)
 //    }    
     
     ret = create_and_pay((void*)&commTestOut, numBuff, buff, (void*)&commTestIn);
-    DebugErrorInfo("return create_and_pay\n");       
+    write(pipe_id, "START", 6);
+    DebugErrorInfo("create_and_pay result is %c\n",commTestOut.is_success);
+    if( commTestOut.is_success == 'T'){
+    	   NDK_ScrClrs();
+    	   NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "支付成功",0);
+    	   NDK_ScrRefresh();
+    }
+    else{
+    	   NDK_ScrClrs();
+    	   NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "支付失败",0);
+    	   NDK_ScrRefresh();
+    }	 
+    NDK_KbGetCode(2, &ucKey);      	
+    return;	      
 //START_PRINT:
 //        
 //        if(ret = NDK_PrnInit(0) != NDK_OK) {                                                                                                                                                                                                                                                                                                
