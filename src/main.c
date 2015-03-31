@@ -380,6 +380,7 @@ int main(void)
     int open_mode = O_RDONLY | O_NONBLOCK;
     
     int err;
+    int wait_rv;              /* return value from wait() */
     unsigned int retry_times = 5;
     pthread_t ntid,rtid;
     sigset_t sigset;
@@ -669,12 +670,19 @@ int main(void)
     	  {
              memset(buffer, 0, 30);
              nbytes = read(pipe_fd, buffer, 30);
-             if(nbytes > 0 || strncmp(buffer,"START",5) == 0) {
+             if(nbytes > 0 && strncmp(buffer,"START",5) == 0) {
                  DebugErrorInfo("Get START Trigger From Main Server!\n"); 
                  query_count = 60;
                  alarm(10);
                  NDK_SysSetSuspend(0);
              }
+             else if(nbytes > 0 && strncmp(buffer,"FINISH",6) == 0) {
+             	   DebugErrorInfo("Get FINISH Trigger From Main Server!\n");
+             	   query_count = 0;
+             	   alarm(0);
+             	   close(pipe_fd);
+             	   exit(0);
+             }	
              //pause();
 
     	  }           	
@@ -815,6 +823,7 @@ int main(void)
         switch(ucKey)
 		    {
 			    case K_ESC:
+			    	goto end;
 			    	break;
 			    case K_ONE:
 
@@ -916,7 +925,14 @@ int main(void)
         
     };
     }
-end:  
+end: 
+	  if(pipe_fd > -1 && newpid > -1){
+	  	  
+	  	  write(pipe_fd, "FINISH", 7);
+	  	  wait_rv = wait(NULL);
+	  	  DebugErrorInfo("Waiting for %d, Wait returned: %d\n", newpid, wait_rv);
+	  	  
+	  }	 
 	  NDK_ScrClrs();  
     /* close the serial port 1 */
     ret = NDK_PortClose(PORT_NUM_COM1);   
@@ -3160,8 +3176,7 @@ void barcodePay(int pipe_id)
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
-    
-    
+       
     while(1){
     	   
         memset(buff, 0, sizeof(buff));
@@ -3184,7 +3199,6 @@ void barcodePay(int pipe_id)
         	  NDK_ScrRefresh();	
         }    
     }
-  
 
 #if 0         
     ret = NDK_KbGetInput(buff, 18, 18, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN); 

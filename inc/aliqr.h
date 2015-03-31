@@ -73,7 +73,7 @@ struct qr_result {
 #define POSTLATESTMD5       "http://"ALISER":80/qrcode/lastest/md5/?"
 #define POSTLATEST          "http://"ALISER":80/qrcode/lastest/?"
 #ifdef  BARCODE_EN
-#define CREATEANDPAY        "http://182.92.8.2:8080/qrcode/createandpay/?"
+#define CREATEANDPAY        "http://"ALISER":8080/qrcode/createandpay/?"
 #endif
 
 #if 1
