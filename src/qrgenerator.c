@@ -241,6 +241,10 @@ int createrefund(void* gout, char* serial_number, char* refund_amount )
     //memset(szQrcodeString, 0,sizeof(szQrcodeString)); 
     /* print the qr code from alipay */
     alipay_main(out, &qrpay_info, ALI_REFUND);
+    if(out->is_success == 'T' && strcmp(out->total_status,"TRADE_SUCCESS") == 0)
+        return 1;
+    else
+        return 0;    
 
 }
 
@@ -505,9 +509,10 @@ int create_and_pay(void* gout, char* price, char* dynamic_id ,void* gin)
     //strcpy(qrpay_info.total_fee,"0.01");^M
     //strcpy(qrpay_info.order_subject,"ccc");
     memset(qrpay_info.order_subject,0, sizeof(qrpay_info.order_subject));
+#if 0    
     if(in && strlen(in->order_subject) > 0)
         strcpy(qrpay_info.order_subject,in->order_subject);
-#if 0        
+        
     else {
         int subjectlen = 0;
         subjectlen = getsubject("/usr/local/D620D/subject.txt",subject);
@@ -518,11 +523,10 @@ int create_and_pay(void* gout, char* price, char* dynamic_id ,void* gin)
             strcpy(qrpay_info.order_subject,defaultsubject);
         }
     }
-#endif
-    else    
-    	  strcpy(qrpay_info.order_subject,defaultsubject); /* temp solution for newland */
+
+#endif    	  
     strftime(ticket_number,sizeof(ticket_number),"%Y%m%d%H%M00",ptr);
-    sprintf(qrpay_info.order_subject,"1678-%s",ticket_number);
+    sprintf(qrpay_info.order_subject,"1788-%s",ticket_number);
 
 
     strftime(order_time,sizeof(order_time),"%Y%m%d%H%M%S",ptr);        
