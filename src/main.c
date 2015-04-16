@@ -318,8 +318,8 @@ end1:
 
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(0, &ucKey);
 
@@ -329,8 +329,8 @@ end2:
 
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(0, &ucKey);
         goto START_PRINT;  
@@ -1215,8 +1215,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-    NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-    NDK_ScrDispString(36, 36, "打印失败", 0); 
+    NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
     NDK_ScrRefresh(); 
     NDK_KbGetCode(2, &ucKey);
     goto START_PRINT;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
@@ -1227,8 +1227,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-    NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-    NDK_ScrDispString(24, 36, "无法执行打印",0); 
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
     NDK_ScrRefresh(); 
     NDK_KbGetCode(2, &ucKey);
     goto START_PRINT;                                                                                                                                                                                                                                                                                                                                       
@@ -1287,6 +1287,7 @@ void printAD()
 	NDK_ScrRefresh();
 
   ret = NDK_PrnInit(0);
+	//ret = NDK_PrnPicture(105, "print.bmp");
 	ret = NDK_PrnPicture(0, "print.bmp");
 	DebugErrorInfo("BMP Loading ret:[%d]\n", ret);
 	
@@ -1296,8 +1297,8 @@ void printAD()
   {
       DebugErrorInfo("PrintBMP ret:[%d]\n", ret); 	
       NDK_SysBeep();        
-      NDK_ScrClrs();
-	    NDK_ScrDispString(36, 24, "打印失败",0);
+      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                         
+      NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
 	    NDK_ScrRefresh();
       NDK_KbGetCode(2, &ucKey);
   }
@@ -1377,8 +1378,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-    NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-    NDK_ScrDispString(36, 36, "打印失败", 0); 
+    NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
     NDK_ScrRefresh(); 
     NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
     return; 
@@ -1388,8 +1389,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-    NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-    NDK_ScrDispString(24, 36, "无法执行打印",0); 
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
     NDK_ScrRefresh(); 
     NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
     return;
@@ -1611,8 +1612,8 @@ void *rcv_fn(void *arg)
             
                     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
                     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                    NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-                    NDK_ScrDispString(36, 36, "打印失败", 0); 
+                    NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+                    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
                     NDK_ScrRefresh(); 
                     NDK_KbGetCode(0, &ucKey);
             
@@ -1622,8 +1623,8 @@ void *rcv_fn(void *arg)
             
                     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
                     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                    NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-                    NDK_ScrDispString(24, 36, "无法执行打印",0); 
+                    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+                    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
                     NDK_ScrRefresh(); 
                     NDK_KbGetCode(0, &ucKey);
                     goto START_PRINT;  
@@ -1796,8 +1797,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
         return; 
@@ -1807,8 +1808,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
         return;
@@ -1816,7 +1817,7 @@ end2:
 
     } else {
         NDK_ScrClrs();
-        NDK_ScrDispString(24, 24, "该单交易失败", 0);
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "该单交易失败", 0);
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);
     }
@@ -1885,8 +1886,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
         return; 
@@ -1896,8 +1897,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
         return;
@@ -2169,8 +2170,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-     NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(36, 36, "打印失败", 0); 
+     NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
      NDK_ScrRefresh(); 
      NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
      return -1; 
@@ -2180,8 +2181,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-     NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(24, 36, "无法执行打印",0); 
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
      NDK_ScrRefresh(); 
      NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
      return -1;
@@ -2450,8 +2451,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-     NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(36, 36, "打印失败", 0); 
+     NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
      NDK_ScrRefresh(); 
      NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
      return -1; 
@@ -2461,8 +2462,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-     NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(24, 36, "无法执行打印",0); 
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
      NDK_ScrRefresh(); 
      NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
      return -1;
@@ -3479,8 +3480,8 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
         NDK_ScrRefresh();
         NDK_KbGetCode(2, &ucKey);
         return;                                                                                                                                                                                                                                                                                                                                                                  
@@ -3488,8 +3489,8 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
         return;
