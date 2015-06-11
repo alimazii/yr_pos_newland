@@ -202,10 +202,10 @@ void endElement(void *userData, const XML_Char *name)
 {
     struct ParserStruct *state = (struct ParserStruct *) userData;
     state->depth--;
-    if(state->characters.size)
+    if(state->characters.size && state->characters.size < 2048) { //in case of buffer overflow in serial port
     printf("%5lu    %5lu   %10lu   %s %s\n",state->tags, state->depth, state->characters.size, name, state->characters.memory);
     DebugErrorInfo("%5lu    %5lu   %10lu   %s %s\n",state->tags, state->depth, state->characters.size, name, state->characters.memory);
-
+    } 
     if( strcmp(name,"o") == 0) {//order
         if(state->characters.memory != NULL) {
             memcpy(st_query_result->order, state->characters.memory,state->characters.size);
@@ -305,6 +305,13 @@ void endElement(void *userData, const XML_Char *name)
             memcpy(st_query_result->version, state->characters.memory,state->characters.size);
         }
     }
+#ifdef BAIDU_EN    
+    if( strcmp(name,"pc") == 0) {//payment channel
+        if(state->characters.memory != NULL) {
+            memcpy(st_query_result->pay_channel, state->characters.memory,state->characters.size);
+        }
+    }
+#endif    
 #if 0
     if( strcmp(name,"result") == 0) {
         if(strstr(state->characters.memory, "qr.alipay.com")) {

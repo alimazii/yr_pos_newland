@@ -22,8 +22,11 @@ char szQrcodeString[QRRESULT] = {0};
 
 //char* subject = "Alipay";
 char subject[128+1] = {0};
-char* defaultsubject = "Alipay";
+char* defaultsubject = "e-richpay";
 int getsubject(char* name,char* buf);
+#ifdef BAIDU_EN
+extern int payment_channel;
+#endif
 
 #if 0
 int main(int argc, char** argv)
@@ -159,10 +162,18 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
     memset(szQrcodeString, 0,sizeof(szQrcodeString)); 
     /* print the qr code from alipay */
     DebugErrorInfo("Get Before alipay_main,imsi is %s\n",qrpay_info.imsi);
+    #ifdef BAIDU_EN
+    if(payment_channel == 1)
+    	strncpy(qrpay_info.pay_channel, "bai", 3);
+    else
+    	strncpy(qrpay_info.pay_channel, "ali", 3);	
+    #endif
     alipay_main(out, &qrpay_info, ALI_PREORDER);
     szSourceString = szQrcodeString;
 
-    if(strstr(out->qrcode, "https://qr.alipay.com/")) {
+    //if(strstr(out->qrcode, "https://qr.alipay.com/")) {
+    //strcpy(out->qrcode,"https://www.baifubao.com/o2o/0/s/0?tinyurl=cskUF5");
+    if(strlen(out->qrcode) > 0) {  
         /* print QR code on D620D */
         //ret = PrintQR(10, 1, 2, szSourceString, 5, 5);
         //ret = PrintQR(6, 1, 2, szSourceString, 5, 7);
@@ -240,6 +251,8 @@ int createrefund(void* gout, char* serial_number, char* refund_amount )
     //strcpy(qrpay_info.refund_amount, refund_amount);
     //memset(szQrcodeString, 0,sizeof(szQrcodeString)); 
     /* print the qr code from alipay */
+    /* support partial refund */
+    strcpy(qrpay_info.refund_amount, refund_amount);
     alipay_main(out, &qrpay_info, ALI_REFUND);
     if(out->is_success == 'T' && strcmp(out->total_status,"TRADE_SUCCESS") == 0)
         return 1;

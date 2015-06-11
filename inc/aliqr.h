@@ -20,6 +20,9 @@ struct payInfo {
 #ifdef BARCODE_EN
     char dynamic_id[18+1]; //payment id
 #endif
+#ifdef BAIDU_EN
+  char pay_channel[8];   //payment channel:alipay,weixin,baidu etc.
+#endif    
 #if 0
     char *imsi;
     char *order_key;
@@ -49,43 +52,51 @@ struct qr_result {
     char take_out_phone[30]; // for take out 
     char md5sum[32+1];
     char version[30+1];
+#ifdef BAIDU_EN
+    char pay_channel[8];
+#endif        
 };
-
+//#ifdef BAIDU_EN
+//typedef struct {
+//	  char amount[10];
+//	  int  channel;
+//}thr_data;	
+//#endif
 #define QRRESULT sizeof(struct qr_result)
 
 #if 0
 #define ALISER "182.92.173.31"
 #else
-//#define ALISER "182.92.8.2"
-#define ALISER "182.92.21.76"
+#define ALISER "182.92.8.2"
+//#define ALISER "182.92.21.76"
 #endif
 
 #define ORDERKEY "11"
 
-#define POSTPREORDER        "http://"ALISER":80/qrcode/preorder/?"
-#define POSTEXCHANGE        "http://"ALISER":80/qrcode/exchange/?"
-#define POSTEXCHANGEORDER   "http://"ALISER":80/qrcode/exchangedorder/?"
-#define POSTQUERY           "http://"ALISER":80/qrcode/q/?"
-#define POSTVIEW            "http://"ALISER":80/qrcode/view/?"
-#define POSTREFUND          "http://"ALISER":80/qrcode/refund/?"
-#define POSTTEMPLATEMD5     "http://"ALISER":80/qrcode/template/md5/?"
-#define POSTTEMPLATE        "http://"ALISER":80/qrcode/template/?"
-#define POSTLATESTMD5       "http://"ALISER":80/qrcode/lastest/md5/?"
-#define POSTLATEST          "http://"ALISER":80/qrcode/lastest/?"
+#define POSTPREORDER        "http://"ALISER":8080/qrcode/preorder/?"
+#define POSTEXCHANGE        "http://"ALISER":8080/qrcode/exchange/?"
+#define POSTEXCHANGEORDER   "http://"ALISER":8080/qrcode/exchangedorder/?"
+#define POSTQUERY           "http://"ALISER":8080/qrcode/q/?"
+#define POSTVIEW            "http://"ALISER":8080/qrcode/view/?"
+#define POSTREFUND          "http://"ALISER":8080/qrcode/refund/?"
+#define POSTTEMPLATEMD5     "http://"ALISER":8080/qrcode/template/md5/?"
+#define POSTTEMPLATE        "http://"ALISER":8080/qrcode/template/?"
+#define POSTLATESTMD5       "http://"ALISER":8080/qrcode/lastest/md5/?"
+#define POSTLATEST          "http://"ALISER":8080/qrcode/lastest/?"
 #ifdef  BARCODE_EN
 #define CREATEANDPAY        "http://"ALISER":8080/qrcode/createandpay/?"
 #endif
 
-#if 1
-#define PREORDER "i=%s&ot=%s&sj=%s&sn=%lld&tf=%s", order_info->imsi, order_info->order_time,order_info->order_subject, order_info->order_number, order_info->total_fee
+#ifdef BAIDU_EN
+#define PREORDER "i=%s&ot=%s&pc=%s&sj=%s&sn=%lld&tf=%s", order_info->imsi, order_info->order_time,order_info->pay_channel,order_info->order_subject, order_info->order_number, order_info->total_fee
 #else
-#define PREORDER "i=%s&ot=%s&sj=%s&sn=%lld&tf=%s&tp=13810362150", order_info->imsi, order_info->order_time,order_info->order_subject, order_info->order_number, order_info->total_fee
+#define PREORDER "i=%s&ot=%s&sj=%s&sn=%lld&tf=%s", order_info->pay_channel, order_info->imsi, order_info->order_time,order_info->order_subject, order_info->order_number, order_info->total_fee
 #endif
 #define PREQUERYTIMEMASK "i=%s&tm=%s", order_info->imsi, order_info->time_mark
 #define PREQUERYMAXTIME "i=%s&mt=%d", order_info->imsi, order_info->max_time
 #define PREIMSI "i=%s", order_info->imsi
 #define PREVIEW "i=%s&sn=%lld", order_info->imsi, order_info->order_number
-#if 0
+#if 1
 #define PREREFUND "i=%s&rfa=%s&sn=%lld", order_info->imsi, order_info->refund_amount,order_info->order_number
 #else
 #define PREREFUND "i=%s&sn=%lld", order_info->imsi, order_info->order_number
@@ -117,6 +128,12 @@ struct receipt_info {
     char trade_no[32];
     char trade_status[16];
     char total_fee[16];
+#ifdef BAIDU_EN
+    char pay_channel[8];
+#endif 
+#ifdef REFUND_EN
+    char refund_amount[14];
+#endif    
 };
 
 /* single query parameters for multi payment results */
