@@ -828,9 +828,9 @@ int main(void)
     #ifdef REFUND_EN
         NDK_ScrDispString(185,108,"6.退款",0);    
     #endif   
-    //#ifdef BAIDU_EN
-    #if 0
-        NDK_ScrDispString(185,108,"6.百度钱包",0); 
+    #ifdef BAIDU_EN
+    //#if 0
+        NDK_ScrDispString(12,138,"8.百度钱包",0); 
     #endif    
         #endif
         }
@@ -1056,9 +1056,9 @@ int main(void)
           	refund(pipe_fd);
           	break;
 #endif  
-//#ifdef BAIDU_EN
-#if 0
-			    case K_SIX:
+#ifdef BAIDU_EN
+//#if 0
+			    case K_EIGHT:
 
 			    	    NDK_ScrClrs();
 			    	    if(display_mode > 0) {
@@ -4096,7 +4096,7 @@ void refund(int pipe_id)
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "退款成功",0);
         //NDK_ScrDispString(0, font_height * 3, queryNo,0);
         NDK_ScrRefresh(); 
-        write(pipe_id, "START", 6);
+        //write(pipe_id, "START", 6);
 START_PRINT:
 
         if(ret = NDK_PrnInit(0) != NDK_OK) {                                                                                                                                                                                                                                                                                                
@@ -4106,44 +4106,54 @@ START_PRINT:
 
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
-        strcpy(PrintBuff,"退款操作提交成功\n\n\n");
-        NDK_PrnStr(PrintBuff);
-#if 0
-        strcpy(PrintBuff,"序列号:\n");
-        strcat(PrintBuff,queryNo);
-        NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");
-                
-        strcpy(PrintBuff,"交易时间:\n");
-        strcat(PrintBuff, serial2date(queryNo));        
-        NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");	
-           
-        strcpy(PrintBuff,"商户订单号:\n");
-        strcat(PrintBuff,commTestOut.out_trade_no);
-        NDK_PrnStr(PrintBuff);	
-        NDK_PrnStr("\n");
-           
-        strcpy(PrintBuff,"金额：\n");
-        strcat(PrintBuff, commTestOut.total_fee);        
-        NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");
+        
+#ifdef BAIDU_EN
 
-        strcpy(PrintBuff,"已退金额：\n");
-        strcat(PrintBuff, commTestOut.refund_amount);        
-        NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");
-                
-        #ifdef BAIDU_EN
-        strcpy(PrintBuff,"支付通道：\n");
-        if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
-           strcat(PrintBuff, "百度钱包");
-        else
-        	 strcat(PrintBuff, "支付宝钱包");          
-        NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");        
-        #endif
-#endif
+        if(strncmp(commTestOut.pay_channel,"bai",3) == 0) {        	
+           strcpy(PrintBuff,"退款操作提交成功\n\n\n");
+           NDK_PrnStr(PrintBuff);
+        }   
+        else {
+#endif        	
+        	 strcpy(PrintBuff,"退款成功\n\n\n");        	                 
+           NDK_PrnStr(PrintBuff);
+           
+           strcpy(PrintBuff,"序列号:\n");
+           strcat(PrintBuff,queryNo);
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");
+                   
+           strcpy(PrintBuff,"交易时间:\n");
+           strcat(PrintBuff, serial2date(queryNo));        
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");	
+              
+           strcpy(PrintBuff,"商户订单号:\n");
+           strcat(PrintBuff,commTestOut.out_trade_no);
+           NDK_PrnStr(PrintBuff);	
+           NDK_PrnStr("\n");
+              
+           strcpy(PrintBuff,"金额：\n");
+           strcat(PrintBuff, commTestOut.total_fee);        
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");
+           
+           strcpy(PrintBuff,"已退金额：\n");
+           strcat(PrintBuff, commTestOut.refund_amount);        
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");
+                   
+#ifdef BAIDU_EN
+           strcpy(PrintBuff,"支付通道：\n");
+           if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
+              strcat(PrintBuff, "百度钱包");
+           else
+           	 strcat(PrintBuff, "支付宝钱包");          
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");        
+         
+        }
+#endif        
         //NDK_PrnStr("\n\n\n");	 
         ret = NDK_PrnStart();
 
