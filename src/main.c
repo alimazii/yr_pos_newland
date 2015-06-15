@@ -2243,7 +2243,10 @@ START_PRINT:
         #ifdef LANG_EN
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
-        strcpy(PrintBuff,"BELOW TRANS IS SUCCESS\n\n\n");
+        if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 )
+        	  strcpy(PrintBuff,"BELOW REFUND IS SUCCESS\n\n\n");
+        else	
+            strcpy(PrintBuff,"BELOW TRANS IS SUCCESS\n\n\n");
         NDK_PrnStr(PrintBuff);
 
         strcpy(PrintBuff,"序列号SN:\n");
@@ -2266,6 +2269,13 @@ START_PRINT:
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");
 
+        if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 ) {
+            strcpy(PrintBuff,"已退金额REFUND：\n");
+            strcat(PrintBuff, commTestOut.refund_amount);        
+            NDK_PrnStr(PrintBuff);
+            NDK_PrnStr("\n");        	
+        }	
+        
         #ifdef BAIDU_EN
         strcpy(PrintBuff,"支付通道CHANNEL：\n");
         if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
@@ -2281,7 +2291,10 @@ START_PRINT:
         #else
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
-        strcpy(PrintBuff,"以下交易确已成功\n\n\n");
+        if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 ) 
+        	  strcpy(PrintBuff,"以下退款确已成功\n\n\n");
+        else	
+            strcpy(PrintBuff,"以下交易确已成功\n\n\n");
         NDK_PrnStr(PrintBuff);
 
         strcpy(PrintBuff,"序列号:\n");
@@ -2304,6 +2317,13 @@ START_PRINT:
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");
 
+        if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 ) {
+            strcpy(PrintBuff,"已退金额：\n");
+            strcat(PrintBuff, commTestOut.refund_amount);        
+            NDK_PrnStr(PrintBuff);
+            NDK_PrnStr("\n");        	
+        }	
+        
         #ifdef BAIDU_EN
         strcpy(PrintBuff,"支付通道：\n");
         if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
