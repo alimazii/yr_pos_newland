@@ -4247,7 +4247,7 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 	  int		numoffset = 0;	
 	  int		nShowChange = 1;	/*判断是否有效按键按下*/
 	  int		tableoffset = 0;
-    int		nAmoutFlag = 0;
+    //int		nAmoutFlag = 0;
 	  int		nMaxHzLines;
 	  long int	lnBigNum,lnSmallNum;
 	  uint unX,unY;
@@ -4348,6 +4348,7 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 			{/*金额输入不能以0开始*/
 				if (nNum == 0)
 				{
+					#if 0
 					if (nMaxHzLines >= 8)
 					{//GP710,GP730
 						//PubBeep(3);
@@ -4359,17 +4360,18 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 		        NDK_ScrDispString(font_width, height - font_height * 2, "不允许零金额输入" ,0);	
 		        #endif
 					}
+					#endif
 					break;
 				}
 			}
-			if (nMaxHzLines >= 8)
-			{//GP710,GP730
-				if (1 == nAmoutFlag)
-				{
-					//NDK_ScrDispString(unFontWidth, 14*8, "                ",0);
-					//TODO:PubClearLine(nMaxHzLines-1,nMaxHzLines-1);
-				}
-			}
+//			if (nMaxHzLines >= 8)
+//			{//GP710,GP730
+//				if (1 == nAmoutFlag)
+//				{
+//					//NDK_ScrDispString(unFontWidth, 14*8, "                ",0);
+//					//TODO:PubClearLine(nMaxHzLines-1,nMaxHzLines-1);
+//				}
+//			}
 			if (nNum >= nMaxLen)
 			{
 				//PubBeep(1);
@@ -4406,6 +4408,7 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 				{
 					if( atol(szGetBuf) == 0 )
 					{
+						#if 0
 						if (nMaxHzLines >= 8)
 						{//GP710,GP730
 							//PubBeep(3);
@@ -4418,6 +4421,7 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 		          #endif
 		          NDK_ScrRefresh();
 						}
+						#endif
 						break;
 					}
 				}
