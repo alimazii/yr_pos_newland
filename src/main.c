@@ -1114,6 +1114,7 @@ int main(void)
 				        	    }	      
 				        	  	NDK_ScrRefresh();
 				        	  	//strncpy(numBuf,"0",1);
+				        	  	memset(numBuf, 0, sizeof(numBuf));
 				        	  	/* FIX ME Later,Money Check */  
 				        	  	//int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nMaxLen, int nTimeOut) 
 				        	  	ret = AmountInput(font_width, line_height * 3, &numBuf, &nbytes, 1, 9, 0);
@@ -4246,7 +4247,7 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 	  int		numoffset = 0;	
 	  int		nShowChange = 1;	/*判断是否有效按键按下*/
 	  int		tableoffset = 0;
-     	int		nAmoutFlag = 0;
+    int		nAmoutFlag = 0;
 	  int		nMaxHzLines;
 	  long int	lnBigNum,lnSmallNum;
 	  uint unX,unY;
