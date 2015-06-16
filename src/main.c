@@ -48,6 +48,7 @@ T_RECEIPT gRCP;
 
 /* from backend */
 extern char jfkey[32+1];
+extern char pos_ver[16+1];
 extern char pos_imsi[20];
 extern struct payInfo qrpay_info;
 static unsigned int query_count;
@@ -3781,6 +3782,7 @@ int SetReceiptInfo()
 int PaySettings()
 {
 	  int ret,ucKey;
+	  //ST_APPINFO PayAppInfo;
 	  
 	  while(1)
 	  {
@@ -3812,6 +3814,7 @@ int PaySettings()
         
         case K_ONE:
           getIMSIconfig();
+          getPosVer();
         	while(1)
         	{
         		//get imsi to display
@@ -3819,6 +3822,18 @@ int PaySettings()
              NDK_ScrClrs();
              NDK_ScrDispString(0, font_height, "IMSI:",0);
              NDK_ScrDispString(0, font_height * 2, pos_imsi, 0);
+             NDK_ScrDispString(0, font_height * 3, "°æ±¾:",0);
+             NDK_ScrDispString(0, font_height * 4, pos_ver, 0);
+//             ret = NDK_AppGetInfo(NULL,0,&PayAppInfo, sizeof(PayAppInfo));
+//             if (ret == NDK_OK && strlen(PayAppInfo.szVerBuf) > 0){
+//
+//             	  NDK_ScrDispString(0, font_height * 3, "°æ±¾:",0);
+//             	  NDK_ScrDispString(0, font_height * 4, PayAppInfo.szVerBuf, 0);
+//             }
+//             else{
+//             	  DebugErrorInfo("Get Info FAIL,ret=%d\n",ret);	
+//             } 
+                         
              NDK_ScrRefresh(); 
               
              NDK_KbGetCode(0, &ucKey);	

@@ -16,6 +16,7 @@ unsigned long long query_number_idx = 1;
 unsigned long long old_query_number = 1;
 char pos_imsi[20];
 char jfkey[32+1] = {0};
+char pos_ver[16+1] = {0};
 
 void getIMSIconfig();
 char szQrcodeString[QRRESULT] = {0};
@@ -420,6 +421,41 @@ int getPosKey()
 #endif        
         return 0;
 
+}
+
+int getPosVer()
+{
+
+        FILE *fp;
+        int i; 
+        char buffer[30]; 
+
+        /* get version from config.txt */
+        fp = fopen("config.txt","r");
+        if(fp == NULL)
+        {       
+            DebugErrorInfo("couldn't open config.txt in getPosVer\n");
+            return 1; 
+        }       
+        fseek(fp, 26, SEEK_SET); /* 5 + 15 + 2 + 2 + 2 */  
+        if( fgets(buffer, sizeof(buffer), fp) == NULL )
+        {       
+            DebugErrorInfo("Error reading pos sw version in config\n");
+            fclose(fp);
+            return 1;
+        }       
+        for (i=0; i<sizeof(buffer); i++) {
+            if(buffer[i] == '\n' || buffer[i] == '\r') { 
+                buffer[i] = '\0'; 
+                break;  
+            }       
+        }       
+
+        strcpy(pos_ver,&buffer[4]);
+        
+        fclose(fp);
+       
+        return 0;
 }
 
 #ifdef CONFIG_INPUTKEY
