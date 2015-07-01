@@ -166,6 +166,8 @@ int generator_qrcode_to_bmp(void* gout, char* price ,void* gin)
     #ifdef BAIDU_EN
     if(payment_channel == 1)
     	strncpy(qrpay_info.pay_channel, "bai", 3);
+    else if (payment_channel == 2) 
+      strncpy(qrpay_info.pay_channel, "wei", 3);
     else
     	strncpy(qrpay_info.pay_channel, "ali", 3);	
     #endif

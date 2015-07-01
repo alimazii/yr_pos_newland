@@ -831,6 +831,7 @@ int main(void)
     #endif   
     #ifdef BAIDU_EN
     //#if 0
+        NDK_ScrDispString(185,108,"6.微信钱包",0);
         NDK_ScrDispString(12,138,"8.百度钱包",0); 
     #endif    
         #endif
@@ -1056,7 +1057,100 @@ int main(void)
           case K_SIX:
           	refund(pipe_fd);
           	break;
-#endif  
+#endif 
+#ifdef BAIDU_EN
+//#if 0
+			    case K_SIX:
+
+			    	    NDK_ScrClrs();
+			    	    if(display_mode > 0) {
+                    #ifdef LANG_EN
+			    	        NDK_ScrDispString(font_width * 2, 0, "Pay by Weixin Wallet",0);
+				            NDK_ScrDispString(font_width, line_height * 2 , "Press OK to input money",0);
+				            NDK_ScrDispString(font_width, line_height * 3, "Press CANCEL/BACK key to return",0);                    
+                    #else			    	    	
+			    	        NDK_ScrDispString(font_width * 2, 0, "欢迎用微信钱包支付",0);
+				            NDK_ScrDispString(font_width * 3, line_height * 2 , "请按OK键输入金额",0);
+				            NDK_ScrDispString(font_width * 2, line_height * 3, "按CANCEL或BACK键返回",0);
+				            #endif
+				        }    
+				        else{
+				        	  #ifdef LANG_EN
+			    	        NDK_ScrDispString(4, 0, "Pay by Alipay Wallet",0);
+				            NDK_ScrDispString(4, 24, "Press OK to continue",0);
+				            NDK_ScrDispString(0, 36, "CANCEL/BACK to return",0);				        	  
+				        	  #else
+				            NDK_ScrDispString(4, 0, "欢迎用微信钱包支付",0);
+				            NDK_ScrDispString(15, 24, "请按OK键输入金额",0);
+				            NDK_ScrDispString(4, 36, "按CANCEL或BACK键返回",0);
+				            #endif
+				        }	
+				        NDK_ScrRefresh();
+				        NDK_KbGetCode(0, &ucKey); 
+				        switch(ucKey)
+				        {
+				        	  case K_ESC:
+				        	  case K_BASP:
+				        	  	break;
+				        	  
+				        	  case K_ENTER:	
+				        	  	NDK_ScrClrs();
+				        	  	if(display_mode > 0) { 
+				        	  		  #ifdef LANG_EN
+				        	  	    NDK_ScrDispString(0, line_height, "Press Enter key when completed",0);
+				        	  	    NDK_ScrDispString(font_width, line_height * 3, "Input money here:",0);				        	  		  
+				        	  		  #else
+				        	  	    NDK_ScrDispString(font_width * 2, line_height, "输入完成请按确认键",0);
+				        	  	    NDK_ScrDispString(font_width * 3, line_height * 2, "请输入金额:",0);
+				        	  	    #endif
+				        	    }
+				        	    else{
+				        	    	  #ifdef LANG_EN
+				        	  	    NDK_ScrDispString(4, 0, "Press Enter key when completed",0);
+				        	  	    NDK_ScrDispString(4, 36, "Input money:",0);				        	    	  
+				        	    	  #else
+				        	    		NDK_ScrDispString(15, 0, "输入完成请按确认键",0);
+				        	  	    NDK_ScrDispString(4, 24, "请输入金额:",0);
+				        	  	    #endif
+				        	    }	      
+				        	  	NDK_ScrRefresh();
+				        	  	//strncpy(numBuf,"0",1);
+				        	  	memset(numBuf, 0, sizeof(numBuf));
+				        	  	/* FIX ME Later,Money Check */  
+				        	  	//int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nMaxLen, int nTimeOut) 
+				        	  	ret = AmountInput(font_width, line_height * 3, &numBuf, &nbytes, 1, 9, 0);
+				        	  	//ret = NDK_KbGetInput(numBuf, 4, 7, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN);
+				        	  	if(ret == NDK_ERR)
+				        	  		break;
+				        	  	DebugErrorInfo("The Input Money:%s\n",numBuf);
+				        	  	#ifdef BAIDU_EN
+				        	  	payment_channel = 2; /* weixin payment */
+				        	  	#endif
+				        	  	err = pthread_create(&ntid, NULL, thr_fn, (void*)numBuf);
+				        	  	
+//				        	  	#ifdef BAIDU_EN
+//				        	  	payment_channel = 1;  /* baidu payment */
+//				        	  	order_data.channel = 1;
+//				        	  	strcpy(order_data.amount, numBuf);
+//				        	  	err = pthread_create(&ntid, NULL, thr_fn, (void*)&order_data);
+//				        	  	#else
+//				        	  	err = pthread_create(&ntid, NULL, thr_fn, (void*)numBuf);
+//				        	  	#endif				        	  	
+				        	  	print_logo();
+				        	  	err = pthread_join(ntid, NULL);
+
+
+                      if(err != 0)
+                      DebugErrorInfo("!!!! query thread create failure-----\n");
+			    	          DebugErrorInfo("We just switch KEY ONE,NOTHING!\n");
+				        	  	
+				        	  	write(pipe_fd, "START", 6);
+				        	  	
+				        	  	break;
+				        }	
+				    break;
+#endif				    
+ 
 #ifdef BAIDU_EN
 //#if 0
 			    case K_EIGHT:
@@ -1429,6 +1523,8 @@ START_PRINT:
     #ifdef BAIDU_EN
     if(payment_channel == 1)
     	strcpy(PrintBuff,"      百度钱包支付\n");
+    else if(payment_channel == 2)
+    	strcpy(PrintBuff,"      微信钱包支付\n");    	
     else	
     #endif	
       strcpy(PrintBuff,"    支付宝钱包支付\n");
@@ -1746,6 +1842,8 @@ end2:
         #ifdef BAIDU_EN
         if(payment_channel == 1)
         	NDK_ScrDispString(24, 24, "链接百度失败",0);
+        else if(payment_channel == 2)
+        	NDK_ScrDispString(24, 24, "链接微信失败",0);
         else	
         #endif	
           NDK_ScrDispString(24, 24, "链接支付宝失败",0);
@@ -1906,6 +2004,8 @@ void *rcv_fn(void *arg)
                     #ifdef BAIDU_EN
                     if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
                     	strcpy(PrintBuff,"百度钱包交易凭条");
+                    else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                    	strcpy(PrintBuff,"微信钱包交易凭条");	
                     else
                     #endif		
                       strcpy(PrintBuff,"支付宝交易凭条");
@@ -1938,6 +2038,8 @@ void *rcv_fn(void *arg)
                     #ifdef BAIDU_EN
                     if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
                     	strcpy(PrintBuff,"百度钱包 安全支付\n");
+                    else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                    	strcpy(PrintBuff,"微信钱包 安全支付\n");	
                     else	
                     #endif	            
                       strcpy(PrintBuff,"支付宝当面付\n");
@@ -1973,6 +2075,8 @@ void *rcv_fn(void *arg)
                          #ifdef BAIDU_EN
                          if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
                          	strcpy(PrintBuff,"百度钱包交易凭条(退款)");
+                         else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                         	strcpy(PrintBuff,"微信钱包交易凭条(退款)");	
                          else
                          #endif		
                            strcpy(PrintBuff,"支付宝交易凭条(退款)");
@@ -1984,6 +2088,8 @@ void *rcv_fn(void *arg)
                         #ifdef BAIDU_EN
                         if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
                         	strcpy(PrintBuff,"百度钱包交易凭条");
+                        else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                        	strcpy(PrintBuff,"微信钱包交易凭条");	
                         else
                         #endif		
                           strcpy(PrintBuff,"支付宝交易凭条");
@@ -1996,6 +2102,8 @@ void *rcv_fn(void *arg)
                     #ifdef BAIDU_EN
                     if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
                     	strcpy(PrintBuff,"百度钱包交易凭条");
+                    else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                    	strcpy(PrintBuff,"微信钱包交易凭条");	
                     else
                     #endif		
                       strcpy(PrintBuff,"支付宝交易凭条");
@@ -2029,6 +2137,8 @@ void *rcv_fn(void *arg)
                     #ifdef BAIDU_EN
                     if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
                     	strcpy(PrintBuff,"百度钱包 安全支付\n");
+                    else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                    	strcpy(PrintBuff,"微信钱包 安全支付\n");                    	
                     else	
                     #endif	            
                       strcpy(PrintBuff,"支付宝当面付\n");            
@@ -3897,8 +4007,8 @@ void barcodePay(int pipe_id)
         NDK_ScrDispString(0, line_height * 3, "    ",0);	
     }
     else{                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(0, 0, "请输入支付宝付款码",0);
-        NDK_ScrDispString(0, 12, "或扫描支付宝付款码\n",0);
+        NDK_ScrDispString(0, 0, "请输入付款码",0);
+        NDK_ScrDispString(0, 12, "或扫描付款码\n",0);
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
@@ -4236,7 +4346,8 @@ end2:
 }
 #endif
 
-#if 1
+/* nX,nY should greater than 1, pszOut value: 123 instead of 1.23(decimal point is not included),nMinLen and nMaxLen
+   only count the digits  */
 int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nMaxLen, int nTimeOut)
 {
 	  char	cCurLetter;
@@ -4449,5 +4560,4 @@ int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nM
 			break;
 		}
 	}
-}	 
-#endif                                                                                                                                                                                                                                                                                                                                               
+}	                                                                                                                                                                                                                                                                                                                                               
