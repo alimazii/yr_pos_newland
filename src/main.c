@@ -437,8 +437,8 @@ int main(void)
         //return -1;
     NDK_ScrClrs();
 
-//#ifdef BARCODE_EN
-#if 0
+#ifdef BARCODE_EN
+//#if 0
     /* use serial port one for 1D Barcode Scanner */
     /* Serial Port Connection: Female to Female, 5<->5, 2<->3, 3<->2 */
     /* Port Configure: 9600-8-"No Parity"-"1 Stop Bit" */
@@ -818,21 +818,21 @@ int main(void)
     	  NDK_ScrDispString(12,48,"1.支付宝",0);
     	  NDK_ScrDispString(12,78,"2.逐单查询",0);
     	  NDK_ScrDispString(12,108,"3.日结",0);
-    	  NDK_ScrDispString(185,48,"4.签到",0);
-    	  NDK_ScrDispString(185,78,"5.结算签退",0);
+    	  NDK_ScrDispString(12,138,"4.签到",0);
+    	  NDK_ScrDispString(185,48,"5.结算签退",0);
     #ifdef CONFIG_INPUTKEY	  
     	  NDK_ScrDispString(185,108,"6.设置",0);
     #endif	
     #ifdef BARCODE_EN
-        NDK_ScrDispString(185,138,"7.条码支付",0);
+        NDK_ScrDispString(185,108,"7.条码支付",0);
     #endif  
     #ifdef REFUND_EN
         NDK_ScrDispString(185,108,"6.退款",0);    
     #endif   
     #ifdef BAIDU_EN
     //#if 0
-        NDK_ScrDispString(185,108,"6.微信钱包",0);
-        NDK_ScrDispString(12,138,"8.百度钱包",0); 
+        NDK_ScrDispString(185,78,"6.微信钱包",0);
+        NDK_ScrDispString(185,138,"8.百度钱包",0); 
     #endif    
         #endif
         }
@@ -985,9 +985,11 @@ int main(void)
 				        	  	    #endif
 				        	    }	      
 				        	  	NDK_ScrRefresh();
+				        	  	memset(numBuf, 0, sizeof(numBuf));
 				        	  	//strncpy(numBuf,"0.00",5);
 				        	  	/* FIX ME Later,Money Check */
-				        	  	ret = NDK_KbGetInput(numBuf, 4, 7, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN);
+				        	  	//ret = NDK_KbGetInput(numBuf, 4, 7, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN);
+				        	  	ret = AmountInput(font_width, line_height * 3, &numBuf, &nbytes, 1, 9, 0);
 				        	  	if(ret == NDK_ERR)
 				        	  		break;
 				        	  	DebugErrorInfo("The Input Money:%s\n",numBuf);
@@ -3983,15 +3985,18 @@ void barcodePay(int pipe_id)
     if (display_mode > 0) 
     {
         NDK_ScrDispString(font_width * 2, line_height, "请输入付款金额\n",0);
-        NDK_ScrDispString(0, line_height * 2, "    ",0);	
+        //NDK_ScrDispString(0, line_height * 2, "    ",0);	
     }
     else{                                                                                                                                                                                                                                                                                                                                      
         NDK_ScrDispString(0, 0, "请输入付款金额\n",0);
-        NDK_ScrDispString(0, font_height, "  ",0);
+        //NDK_ScrDispString(0, font_height, "  ",0);
     }
     NDK_ScrRefresh();
     
-    ret = NDK_KbGetInput(numBuff, 4, 7, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN);
+    //ret = NDK_KbGetInput(numBuff, 4, 7, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN);
+    memset(numBuff, 0, sizeof(numBuff));
+    ret = AmountInput(font_width, line_height * 2, &numBuff, &nbytes, 1, 9, 0);
+    
      
     if(ret != NDK_OK)
     {
@@ -4012,7 +4017,7 @@ void barcodePay(int pipe_id)
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
-#if 0       
+#if 1       
     while(1){
     	   
         memset(buff, 0, sizeof(buff));
@@ -4033,10 +4038,13 @@ void barcodePay(int pipe_id)
         	  NDK_ScrClrs();
         	  NDK_ScrDispString(font_width * 2, line_height, "正在读取中...\n",0);
         	  NDK_ScrRefresh();	
+        	  NDK_KbGetCode(1, &ucKey);
+        	  if(ucKey == K_ESC)
+        	  	return; 
         }    
     }
 #endif
-#if 1         
+#if 0         
     ret = NDK_KbGetInput(buff, 18, 18, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN); 
     
     if(ret != NDK_OK)
