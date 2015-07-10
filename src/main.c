@@ -204,10 +204,10 @@ void payment_alarm_handler(int sig) {
         NDK_SysSetSuspend(0);
         return ;
     }
-    
+      
     /*nbytes = strlen(payquery_result.order);
     write(socket_fd, payquery_result.order, nbytes);*/
-    nbytes = write(socket_fd, (char *)&payquery_result , sizeof(struct qr_result));
+    nbytes = write(socket_fd, (char *)&payquery_result , sizeof(struct qr_result)); 
     close(socket_fd);
 #endif 
 #if 0   
@@ -1949,7 +1949,17 @@ void *rcv_fn(void *arg)
             	  	 	
             	  }	
             	  //nbytes = read(connection_fd, (char *)&p_result, sizeof(struct qr_result));            	  
-            	  
+    
+                /* Indicate the receipt will be printed out */
+                NDK_ScrPush();
+                NDK_ScrClrs();
+                NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "交易成功",0);
+                NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印回单",0);
+                NDK_ScrRefresh(); 
+                NDK_KbGetCode(2, &ucKey); 
+                NDK_ScrPop();
+                NDK_ScrRefresh(); 
+                	  
             	  DebugErrorInfo("MESSAGE FROM ALIPAY: %s\n", p_result.order);  
             	  trade_num = SplitStr(p_result.order,trade_ptr,"|");
 
@@ -4017,7 +4027,8 @@ void barcodePay(int pipe_id)
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
-#if 1       
+#if 1 
+    NDK_PortClrBuf(PORT_NUM_COM1); /* clear rcv buf in case of scanning before */      
     while(1){
     	   
         memset(buff, 0, sizeof(buff));
@@ -4036,7 +4047,8 @@ void barcodePay(int pipe_id)
         }
         else{
         	  NDK_ScrClrs();
-        	  NDK_ScrDispString(font_width * 2, line_height, "正在读取中...\n",0);
+        	  NDK_ScrDispString(font_width * 4, line_height, "正在读取中...\n",0);
+        	  NDK_ScrDispString(font_width * 4, height - font_height * 2, "按取消键退出\n",0);
         	  NDK_ScrRefresh();	
         	  NDK_KbGetCode(1, &ucKey);
         	  if(ucKey == K_ESC)
