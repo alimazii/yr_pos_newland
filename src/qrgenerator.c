@@ -325,10 +325,12 @@ void getIMSIconfig()
     int i, ret;
     char buffer[30];
     
+    #ifndef ETHERNET_EN
     ret = NDK_WlGetInfo(WLM_INFO_IMSI, &pos_imsi, 20);
     if (ret == NDK_OK) 
     		DebugErrorInfo("the pos imsi from SIM is %s\n",pos_imsi);
-
+    #endif
+      
     if (pos_imsi[0] == '\0'){
 
         /* get imsi from config.txt */
@@ -502,6 +504,48 @@ int setPosKey()
         NDK_ScrClrs();
         NDK_ScrDispString(24, 12, "密钥更新成功",0);
         NDK_ScrDispString(24, 24, "需要重启机器",0);
+        NDK_ScrRefresh(); 
+        
+        NDK_KbGetCode(2, &ucKey);
+        NDK_SysReboot();
+        return 0;			   
+}
+#endif
+
+#ifdef ETHERNET_EN
+int setPosIMSI()
+{
+        FILE *fp;
+        int i,ret,ucKey;  
+        char imsi_string[30];
+
+        /* set IMSI to config.txt */
+        fp = fopen("config.txt","r+");
+        if(fp == NULL)
+        {       
+            DebugErrorInfo("couldn't open config.txt to set IMSI\n");
+            return 1; 
+        }
+        fseek(fp, 0, SEEK_SET); 
+        	         
+        NDK_ScrClrs();
+        NDK_ScrDispString(0, 0, "请输入IMSI(15位):\n",0);
+        //NDK_ScrDispString(font_width * 4, height - font_height * 2, "按取消键退出\n",0);
+        NDK_ScrRefresh();    
+        
+        ret = NDK_KbGetInput(pos_imsi, 15, 15, NULL, INPUTDISP_OTHER, 0, INPUT_CONTRL_LIMIT_ERETURN);
+		    if(ret == NDK_ERR)
+			     return 1;
+			  sprintf(imsi_string, "IMSI:%s", pos_imsi);   
+			  if (fputs(imsi_string, fp) == EOF) 
+			  {
+            DebugErrorInfo("couldn't write IMSI to config.txt\n");
+            return 1; 			  	
+			  } 
+			  fclose(fp);
+        NDK_ScrClrs();
+        NDK_ScrDispString(24, 12, "IMSI更新成功",0);
+        NDK_ScrDispString(24, 42, "需要重启机器",0);
         NDK_ScrRefresh(); 
         
         NDK_KbGetCode(2, &ucKey);

@@ -344,12 +344,13 @@ end2:
     }
 #endif
 
-
+#ifndef ETHERNET_EN
     query_count = 0;
     alarm(0);
 
     DebugErrorInfo("stop alarm timer after query completed\n");
     return;
+#endif    
     }
 
     query_count--;
@@ -528,7 +529,11 @@ int main(void)
 	      	DebugErrorInfo("读取配置文件成功!\n");
 	      }
 	  }
-#endif    
+#endif 
+#ifdef ETHERNET_EN
+    ret = NDK_NetDHCP();
+    DebugErrorInfo("Ethernet DHCP Status,ret=%d\n",ret);
+#else   
     memset((char *)&PPPDialCfg, 0, sizeof(ST_PPP_CFG));
     sprintf(szTmpBuf, "+CGDCONT=1,\"IP\",\"CMNET\"");
     //sprintf(szTmpBuf, "+CGDCONT=1,\"IP\",\"e-ideas\"");
@@ -542,7 +547,7 @@ int main(void)
     //DebugErrorInfo("go before PPP Dialing,modem ret is %d,status is %d\n",ret,nStatus);
     ret = NDK_PppDial("","");
     //DebugErrorInfo("go after PPP Dialing\n");
-    
+  
     while(1){
         if (ret == NDK_OK){
         	  
@@ -599,7 +604,7 @@ int main(void)
 //        	  goto end;
         }
     }  
-    
+#endif  //ETHERNET_EN  
 //    while(1){ 
 //        NDK_PppCheck(&nStatus, &nErrCode);
 //        NDK_ScrClrs();
@@ -792,7 +797,11 @@ int main(void)
     while(1)
     {
     	  NDK_ScrClrs();
+    	  #ifdef ETHERNET_EN
+    	  NDK_ScrStatusbar(STATUSBAR_DISP_TIME|STATUSBAR_POSITION_TOP);
+    	  #else
     	  NDK_ScrStatusbar(STATUSBAR_DISP_ALL|STATUSBAR_POSITION_TOP);
+    	  #endif
     	  if(display_mode > 0){
 
     	  //NDK_ScrDispString(112,0,"盈润捷通",0);
@@ -873,8 +882,9 @@ int main(void)
         #endif       	
         }	  
         NDK_ScrRefresh();
-    	  NDK_KbGetCode(0, &ucKey);  
-
+    	  NDK_KbGetCode(0, &ucKey);
+    	    
+#ifndef ETHERNET_EN
     NDK_PppCheck(&nStatus, &nErrCode);
     if(nStatus != PPP_STATUS_CONNECTED){ 
     	
@@ -922,7 +932,7 @@ int main(void)
          continue;
          
     }
-   	  
+#endif  //ETHERNET_EN 	  
     	  if(ucKey == K_ONE)
     	  	  DebugErrorInfo("Key 1 pressed!\n");
         switch(ucKey)
@@ -1004,8 +1014,15 @@ int main(void)
                       #ifdef BAIDU_EN
                       payment_channel = 0;  /* alipay */
                       #endif
+                      /* qrcode received very quickly */
+                      #ifdef ETHERNET_EN
+                      print_logo();
                       err = pthread_create(&ntid, NULL, thr_fn, (void*)numBuf);
-				        	  	print_logo();
+                      #else
+                      err = pthread_create(&ntid, NULL, thr_fn, (void*)numBuf);
+                      print_logo();
+                      #endif
+				        	  	//print_logo();
 				        	  	err = pthread_join(ntid, NULL);
 
 
@@ -3905,6 +3922,7 @@ int SetReceiptInfo()
 int PaySettings()
 {
 	  int ret,ucKey;
+	  char posIp[12];
 	  //ST_APPINFO PayAppInfo;
 	  
 	  while(1)
@@ -3915,6 +3933,10 @@ int PaySettings()
             
             NDK_ScrDispString(12,48,"1.设备信息",0);    	         	      
     	      NDK_ScrDispString(12,78,"2.小票设置",0);
+    	      NDK_ScrDispString(12,108,"3.网络连接",0);
+    	      #ifdef ETHERNET_EN
+    	      NDK_ScrDispString(12,138,"4.商户参数",0);
+    	      #endif
     	      
     	  }
     	  else 
@@ -3922,7 +3944,11 @@ int PaySettings()
             NDK_ScrDispString(width/2 - font_width,0,"设置",0);
             
             NDK_ScrDispString(4,12,"1.设备信息",0);
-    	      NDK_ScrDispString(4,24,"2.小票设置",0);    	  		
+    	      NDK_ScrDispString(4,24,"2.小票设置",0);
+    	      NDK_ScrDispString(4,36,"3.网络连接",0); 
+    	      #ifdef ETHERNET_EN
+    	      NDK_ScrDispString(4,48,"4.商户参数",0);
+    	      #endif    	         	  		
     	  }
         NDK_ScrRefresh();
         
@@ -3969,6 +3995,35 @@ int PaySettings()
         	SetReceiptInfo();
         	break;	
 #endif  
+        case K_THREE:
+        	while(1)
+        	{
+        	   #ifdef ETHERNET_EN
+        	   NDK_NetGetAddr(COMM_TYPE_ETH, posIp, NULL, NULL, NULL);
+        	   NDK_ScrClrs();
+        	   NDK_ScrDispString(0, font_height, "网络类型:",0);
+        	   NDK_ScrDispString(0, font_height * 2, "ETHERNET", 0);
+        	   #else
+        	   NDK_NetGetAddr(COMM_TYPE_PPP, posIp, NULL, NULL, NULL);
+        	   NDK_ScrClrs();
+        	   NDK_ScrDispString(0, font_height, "网络类型:",0);
+        	   NDK_ScrDispString(0, font_height * 2, "PPP", 0);
+        	   #endif
+        	   NDK_ScrDispString(0, font_height * 3, "IP地址:", 0);
+        	   NDK_ScrDispString(0, font_height * 4, posIp, 0);        	   
+        	   NDK_ScrRefresh();
+        	   
+             NDK_KbGetCode(0, &ucKey);	
+             if(ucKey == K_ESC || ucKey == K_BASP)
+             	 break;
+          }
+          break;
+        #ifdef ETHERNET_EN  
+        case K_FOUR:
+        	getIMSIconfig();
+        	setPosIMSI();
+        	break;
+        #endif	  
         }   		    	    	
 	  }	
 }   
@@ -3976,7 +4031,7 @@ int PaySettings()
 #ifdef BARCODE_EN
 void barcodePay(int pipe_id)
 {
-    int ret = 0, ucKey;
+    int ret = 0, ucKey, i;
     int nbytes = 0;
     EM_PRN_STATUS PrnStatus;
     //T_DATETIME tTime;
@@ -3985,6 +4040,7 @@ void barcodePay(int pipe_id)
     char buff[30];
     char numBuff[10];
     char order_time[23] = {0};
+    int  invalid_code = 0;
     //GetDateTime(&tTime);
     time(&td);
     ptr = localtime(&td);
@@ -4033,17 +4089,30 @@ void barcodePay(int pipe_id)
     	   
         memset(buff, 0, sizeof(buff));
         nbytes = 0;
-        ret = NDK_PortRead(PORT_NUM_COM1, 18, buff, 500, &nbytes); 
+        ret = NDK_PortRead(PORT_NUM_COM1, 18, buff, 500, &nbytes);
         
         if (ret == NDK_OK && nbytes == 18){
-            NDK_ScrClrs();
-            buff[18] = '\0';
+        	
+            for (i=0; i < 18; i++) {
+                if(buff[i] == '\n' || buff[i] == '\r') { 
+                    /* invalid barcode, rescan */
+                    invalid_code = 1; 
+                    break; 
+                }     
+            } 
+            
+            if (invalid_code == 0){       	
+                NDK_ScrClrs();
+                buff[18] = '\0';
+                
+                NDK_ScrPrintf("  付款码读取成功\n");
+                NDK_ScrPrintf("Number:%s\n",buff);            
+                NDK_ScrRefresh();
+                break;
+            }
 
-            NDK_ScrPrintf("  付款码读取成功\n");
-            NDK_ScrPrintf("Number:%s\n",buff);            
-            NDK_ScrRefresh();
-            break;
-        
+            invalid_code = 0;
+            	          
         }
         else{
         	  NDK_ScrClrs();
