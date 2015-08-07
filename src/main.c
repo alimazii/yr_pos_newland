@@ -833,7 +833,7 @@ int main(void)
     	  NDK_ScrDispString(185,108,"6.设置",0);
     #endif	
     #ifdef BARCODE_EN
-        NDK_ScrDispString(185,108,"7.条码支付",0);
+        //NDK_ScrDispString(185,108,"7.条码支付",0);
     #endif  
     #ifdef REFUND_EN
         NDK_ScrDispString(185,108,"6.退款",0);    
@@ -841,7 +841,7 @@ int main(void)
     #ifdef BAIDU_EN
     //#if 0
         NDK_ScrDispString(185,78,"6.微信钱包",0);
-        NDK_ScrDispString(185,138,"8.百度钱包",0); 
+        NDK_ScrDispString(185,108,"7.百度钱包",0); 
     #endif    
         #endif
         }
@@ -1067,7 +1067,8 @@ int main(void)
           	setPosKey();
           	break;
 #endif
-#ifdef BARCODE_EN            
+//#ifdef BARCODE_EN
+#if 0            
           case K_SEVEN:
           	barcodePay(pipe_fd);
           	break;
@@ -1172,7 +1173,8 @@ int main(void)
  
 #ifdef BAIDU_EN
 //#if 0
-			    case K_EIGHT:
+			    //case K_EIGHT:
+			    case K_SEVEN:
 
 			    	    NDK_ScrClrs();
 			    	    if(display_mode > 0) {
@@ -1669,8 +1671,8 @@ void printAD()
 	NDK_ScrRefresh();
 
   ret = NDK_PrnInit(0);
-	//ret = NDK_PrnPicture(105, "print.bmp");
-	ret = NDK_PrnPicture(0, "print.bmp");
+	ret = NDK_PrnPicture(105, "print.bmp");
+	//ret = NDK_PrnPicture(0, "print.bmp");
 	DebugErrorInfo("BMP Loading ret:[%d]\n", ret);
 	
 	ret = NDK_PrnStart();
@@ -2469,7 +2471,9 @@ START_PRINT:
         strcpy(PrintBuff,"支付通道：\n");
         if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
            strcat(PrintBuff, "百度钱包");
-        else
+        else if(strncmp(commTestOut.pay_channel,"wei",3) == 0)
+        	 strcat(PrintBuff, "微信钱包");
+        else 	 
         	 strcat(PrintBuff, "支付宝钱包");          
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");        
@@ -2644,7 +2648,7 @@ int query24h(void)
     int trade_num;
     char trade_numstr[64] = {0};
     char *trade_ptr[2000] = {NULL}; 
-    char *trade_detail[5] = {NULL}; 
+    char *trade_detail[7] = {NULL}; 
     char showbuf[50]={0};
     //char pos_date[12];
     //char pos_time[12];
@@ -2775,6 +2779,9 @@ START_PRINT:
         strcpy(pos_receipt.out_trade_no,trade_detail[1]);
         strcpy(pos_receipt.trade_no,trade_detail[2]);
         strcpy(pos_receipt.total_fee,trade_detail[3]);
+#ifdef BAIDU_EN
+        strcpy(pos_receipt.pay_channel,trade_detail[5]);
+#endif        
 
 #ifdef REFUND_EN
         if (i >= commTestOut.order_total) {
@@ -2845,7 +2852,18 @@ START_PRINT:
         strcpy(PrintBuff,"金额：");
         strcat(PrintBuff, pos_receipt.total_fee);
         NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");	   
+        NDK_PrnStr("\n");
+        #ifdef BAIDU_EN
+        strcpy(PrintBuff,"支付通道：");
+        if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)        	
+           strcat(PrintBuff, "百度钱包");
+        else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+        	 strcat(PrintBuff, "微信钱包");
+        else 	 
+        	 strcat(PrintBuff, "支付宝钱包");          
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");        
+        #endif        	   
         strcpy(PrintBuff,"------------------\n");
         NDK_PrnStr(PrintBuff);
         #endif
