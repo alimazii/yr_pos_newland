@@ -68,24 +68,24 @@ struct qr_result {
 #define ALISER "182.92.173.31"
 #else
 //#define ALISER "182.92.8.2"
-#define ALISER "182.92.21.76"
-//#define ALISER "123.57.66.196"
+//#define ALISER "182.92.21.76"
+#define ALISER "123.57.66.196"
 #endif
 
 #define ORDERKEY "11"
 
-#define POSTPREORDER        "http://"ALISER":80/qrcode/preorder/?"
-#define POSTEXCHANGE        "http://"ALISER":80/qrcode/exchange/?"
-#define POSTEXCHANGEORDER   "http://"ALISER":80/qrcode/exchangedorder/?"
-#define POSTQUERY           "http://"ALISER":80/qrcode/q/?"
-#define POSTVIEW            "http://"ALISER":80/qrcode/view/?"
-#define POSTREFUND          "http://"ALISER":80/qrcode/refund/?"
-#define POSTTEMPLATEMD5     "http://"ALISER":80/qrcode/template/md5/?"
-#define POSTTEMPLATE        "http://"ALISER":80/qrcode/template/?"
-#define POSTLATESTMD5       "http://"ALISER":80/qrcode/lastest/md5/?"
-#define POSTLATEST          "http://"ALISER":80/qrcode/lastest/?"
-#ifdef  BARCODE_EN
-#define CREATEANDPAY        "http://"ALISER":80/qrcode/createandpay/?"
+#define POSTPREORDER        "http://"ALISER":8080/qrcode/preorder/?"
+#define POSTEXCHANGE        "http://"ALISER":8080/qrcode/exchange/?"
+#define POSTEXCHANGEORDER   "http://"ALISER":8080/qrcode/exchangedorder/?"
+#define POSTQUERY           "http://"ALISER":8080/qrcode/q/?"
+#define POSTVIEW            "http://"ALISER":8080/qrcode/view/?"
+#define POSTREFUND          "http://"ALISER":8080/qrcode/refund/?"
+#define POSTTEMPLATEMD5     "http://"ALISER":8080/qrcode/template/md5/?"
+#define POSTTEMPLATE        "http://"ALISER":8080/qrcode/template/?"
+#define POSTLATESTMD5       "http://"ALISER":8080/qrcode/lastest/md5/?"
+#define POSTLATEST          "http://"ALISER":8080/qrcode/lastest/?"
+#ifdef  BARCODE_EN                             
+#define CREATEANDPAY        "http://"ALISER":8080/qrcode/createandpay/?"
 #endif
 
 #ifdef BAIDU_EN
