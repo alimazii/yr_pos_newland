@@ -2390,7 +2390,7 @@ START_PRINT:
         #ifdef LANG_EN
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
-        if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 )
+        if(strncmp(commTestOut.refund_status, "ACCEPT",6) != 0 )
         	  strcpy(PrintBuff,"BELOW REFUND IS SUCCESS\n\n\n");
         else	
             strcpy(PrintBuff,"BELOW TRANS IS SUCCESS\n\n\n");
@@ -2438,8 +2438,11 @@ START_PRINT:
         #else
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
-        if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 ) 
-        	  strcpy(PrintBuff,"以下退款确已成功\n\n\n");
+
+        if(strncmp(commTestOut.refund_status, "SUCCESS",7) == 0 ) 
+        	  strcpy(PrintBuff,"以下退款已退成功\n\n\n");
+        else if(strncmp(commTestOut.refund_status, "ACCEPT",6) == 0 )	
+            strcpy(PrintBuff,"以下退款已提交\n\n\n");        	  
         else	
             strcpy(PrintBuff,"以下交易确已成功\n\n\n");
         NDK_PrnStr(PrintBuff);
@@ -2459,13 +2462,13 @@ START_PRINT:
         NDK_PrnStr(PrintBuff);	
         NDK_PrnStr("\n");
            
-        strcpy(PrintBuff,"金额：\n");
+        strcpy(PrintBuff,"总金额：\n");
         strcat(PrintBuff, commTestOut.total_fee);        
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");
 
         if(strncmp(commTestOut.refund_amount, "0.00",4) != 0 ) {
-            strcpy(PrintBuff,"已退金额：\n");
+            strcpy(PrintBuff,"退款金额：\n");
             strcat(PrintBuff, commTestOut.refund_amount);        
             NDK_PrnStr(PrintBuff);
             NDK_PrnStr("\n");        	
@@ -2788,8 +2791,10 @@ START_PRINT:
 #endif        
 
 #ifdef REFUND_EN
+        strcpy(pos_receipt.refund_amount,trade_detail[6]);
         if (i >= commTestOut.order_total) {
-        temp_fee = Money2int(trade_detail[3]);
+        total24h_fee += Money2int(trade_detail[3]);
+        temp_fee = Money2int(trade_detail[6]);
         total24h_fee -= temp_fee;
         total24h_refund += temp_fee;
         }
@@ -2857,6 +2862,14 @@ START_PRINT:
         strcat(PrintBuff, pos_receipt.total_fee);
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");
+        #ifdef REFUND_EN
+        if(strncmp(pos_receipt.refund_amount, "0.00",4) != 0 ) {
+            strcpy(PrintBuff,"退款金额：");
+            strcat(PrintBuff, pos_receipt.refund_amount);        
+            NDK_PrnStr(PrintBuff);
+            NDK_PrnStr("\n");        	
+        }
+        #endif	        
         #ifdef BAIDU_EN
         strcpy(PrintBuff,"支付通道：");
         if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)        	
@@ -2955,7 +2968,7 @@ START_PRINT:
     NDK_PrnStr("\n");	   
 #ifdef REFUND_EN
     /* use temp_feestr as the string of refund money */
-    sprintf(temp_feestr,"%d\n", total24h_refund);
+    sprintf(temp_feestr,"%d", total24h_refund);
     Moneyformat(temp_feestr);
     #ifdef LANG_EN
     strcpy(PrintBuff,"REFUND AMOUNT TOTAL:");
@@ -3139,8 +3152,10 @@ START_PRINT:
 #endif        
 
 #ifdef REFUND_EN
+        strcpy(pos_receipt.refund_amount,trade_detail[6]);
         if (i >= commTestOut.order_total) {
-        temp_fee = Money2int(trade_detail[3]);
+        total24h_fee += Money2int(trade_detail[3]);
+        temp_fee = Money2int(trade_detail[6]);
         total24h_fee -= temp_fee;
         total24h_refund += temp_fee;
         }
@@ -3180,6 +3195,14 @@ START_PRINT:
         strcat(PrintBuff, pos_receipt.total_fee);
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");	
+        #ifdef REFUND_EN
+        if(strncmp(pos_receipt.refund_amount, "0.00",4) != 0 ) {
+            strcpy(PrintBuff,"退款金额：");
+            strcat(PrintBuff, pos_receipt.refund_amount);        
+            NDK_PrnStr(PrintBuff);
+            NDK_PrnStr("\n");        	
+        }
+        #endif	        
         #ifdef BAIDU_EN
         strcpy(PrintBuff,"支付通道：");
         if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)        	
@@ -3268,7 +3291,7 @@ START_PRINT:
     NDK_PrnStr("\n");	   
 #ifdef REFUND_EN
     /* use temp_feestr as the string of refund money */
-    sprintf(temp_feestr,"%d\n", total24h_refund);
+    sprintf(temp_feestr,"%d", total24h_refund);
     Moneyformat(temp_feestr);
     strcpy(PrintBuff,"总退款金额:");
     strcat(PrintBuff, temp_feestr);
@@ -4120,7 +4143,7 @@ void barcodePay(int pipe_id)
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
-#if 0 
+#if 1 
     NDK_PortClrBuf(PORT_NUM_COM1); /* clear rcv buf in case of scanning before */      
     while(1){
     	   
@@ -4162,7 +4185,7 @@ void barcodePay(int pipe_id)
         }    
     }
 #endif
-#if 1         
+#if 0         
     ret = NDK_KbGetInput(buff, 18, 18, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN); 
     
     if(ret != NDK_OK)
@@ -4389,17 +4412,13 @@ START_PRINT:
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
         
-#ifdef BAIDU_EN
-
-        if(strncmp(commTestOut.pay_channel,"bai",3) == 0 || strncmp(commTestOut.pay_channel,"wei",3) == 0) {        	
-           strcpy(PrintBuff,"退款操作提交成功\n\n\n");
+#ifdef BAIDU_EN	        	 
+        	 strcpy(PrintBuff,"退款操作提交成功\n\n\n");       	                 
            NDK_PrnStr(PrintBuff);
-        }   
-        else {
-#endif        	
+#else
         	 strcpy(PrintBuff,"退款成功\n\n\n");        	                 
            NDK_PrnStr(PrintBuff);
-           
+#endif           
            strcpy(PrintBuff,"序列号:\n");
            strcat(PrintBuff,queryNo);
            NDK_PrnStr(PrintBuff);
@@ -4415,12 +4434,12 @@ START_PRINT:
            NDK_PrnStr(PrintBuff);	
            NDK_PrnStr("\n");
               
-           strcpy(PrintBuff,"金额：\n");
+           strcpy(PrintBuff,"总金额：\n");
            strcat(PrintBuff, commTestOut.total_fee);        
            NDK_PrnStr(PrintBuff);
            NDK_PrnStr("\n");
            
-           strcpy(PrintBuff,"已退金额：\n");
+           strcpy(PrintBuff,"退款金额：\n");
            strcat(PrintBuff, commTestOut.refund_amount);        
            NDK_PrnStr(PrintBuff);
            NDK_PrnStr("\n");
@@ -4436,7 +4455,6 @@ START_PRINT:
            NDK_PrnStr(PrintBuff);
            NDK_PrnStr("\n");        
          
-        }
 #endif        
         //NDK_PrnStr("\n\n\n");	 
         ret = NDK_PrnStart();

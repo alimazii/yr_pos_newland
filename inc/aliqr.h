@@ -15,7 +15,7 @@ struct payInfo {
     char refund_amount[9+1+2+1]; //refund
     int  max_time; // for query 120 = 2hours
     char time_mark[14+1]; // for query with time_mark
-    char take_out_phone[30]; // for take out 
+    char refund_status[30]; // for take out 
 #endif
 #ifdef BARCODE_EN
     char dynamic_id[18+1]; //payment id
@@ -49,7 +49,7 @@ struct qr_result {
     char amount_total[10+1+2+1];
     char exchange_start_time[19+1];
     char exchange_end_time[19+1];
-    char take_out_phone[30]; // for take out 
+    char refund_status[30]; // for take out 
     char md5sum[32+1];
     char version[30+1];
 #ifdef BAIDU_EN

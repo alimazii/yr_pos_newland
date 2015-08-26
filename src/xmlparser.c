@@ -290,9 +290,9 @@ void endElement(void *userData, const XML_Char *name)
             memcpy(st_query_result->exchange_end_time, state->characters.memory,state->characters.size);
         }
     }
-    if( strcmp(name,"tp") == 0) {//take out telephone number 
+    if( strcmp(name,"rs") == 0) {//refund status 
         if(state->characters.memory != NULL) {
-            memcpy(st_query_result->take_out_phone, state->characters.memory,state->characters.size);
+            memcpy(st_query_result->refund_status, state->characters.memory,state->characters.size);
         }
     }
     if( strcmp(name,"m") == 0) {//md5sum
