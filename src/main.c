@@ -343,7 +343,7 @@ end2:
     
     }
 #endif
-
+    setTimeMark(time_mark);
 #ifndef ETHERNET_EN
     query_count = 0;
     alarm(0);
@@ -672,7 +672,8 @@ int main(void)
       return 1;
 	  }
 	  strcpy(qrpay_info.imsi, pos_imsi);
-	  strcpy(qrpay_info.order_key, jfkey);	  
+	  strcpy(qrpay_info.order_key, jfkey);
+	  getTimeMark();	  
 
 
     if( (newpid = fork()) == -1)

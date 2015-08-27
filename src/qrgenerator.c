@@ -28,6 +28,7 @@ int getsubject(char* name,char* buf);
 #ifdef BAIDU_EN
 extern int payment_channel;
 #endif
+extern char time_mark[32];
 
 #if 0
 int main(int argc, char** argv)
@@ -456,6 +457,70 @@ int getPosVer()
         }       
 
         strcpy(pos_ver,&buffer[4]);
+        
+        fclose(fp);
+       
+        return 0;
+}
+
+int getTimeMark()
+{
+
+        FILE *fp;
+        int i; 
+        char buffer[30]; 
+
+        /* get version from config.txt */
+        fp = fopen("config.txt","r");
+        if(fp == NULL)
+        {       
+            DebugErrorInfo("couldn't open config.txt in getTimeMark\n");
+            return 1; 
+        }       
+        fseek(fp, 44, SEEK_SET); /* 5 + 15 + 2 + 2 + 2 + 4 + 12 + 2 */  
+        if( fgets(buffer, sizeof(buffer), fp) == NULL )
+        {       
+            DebugErrorInfo("Error reading pos time mark in config\n");
+            fclose(fp);
+            return 1;
+        }       
+        for (i=0; i<sizeof(buffer); i++) {
+            if(buffer[i] == '\n' || buffer[i] == '\r') { 
+                buffer[i] = '\0'; 
+                break;  
+            }       
+        }       
+        
+        if(i > 10)  /* mean time mark does exist */ 
+            strcpy(time_mark,&buffer[3]); 
+        
+        fclose(fp);
+       
+        return 0;
+}
+
+int setTimeMark(char* timemark_str)
+{
+
+        FILE *fp;
+        int i; 
+        char buffer[30];
+        char tm_string[30]; 
+
+        /* get version from config.txt */
+        fp = fopen("config.txt","r+");
+        if(fp == NULL)
+        {       
+            DebugErrorInfo("couldn't open config.txt in getTimeMark\n");
+            return 1; 
+        }
+        sprintf(tm_string, "TM:%s", timemark_str);        
+        fseek(fp, 44, SEEK_SET); /* 5 + 15 + 2 + 2 + 2 + 4 + 12 + 2 */ 
+        if (fputs(tm_string, fp) == EOF) 
+			  {
+            DebugErrorInfo("couldn't write time mark to config.txt\n");
+            return 1; 			  	
+			  }          
         
         fclose(fp);
        
