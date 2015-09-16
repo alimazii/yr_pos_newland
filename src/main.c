@@ -438,8 +438,8 @@ int main(void)
         //return -1;
     NDK_ScrClrs();
 
-//#ifdef BARCODE_EN
-#if 0
+#ifdef BARCODE_EN
+//#if 0
     /* use serial port one for 1D Barcode Scanner */
     /* Serial Port Connection: Female to Female, 5<->5, 2<->3, 3<->2 */
     /* Port Configure: 9600-8-"No Parity"-"1 Stop Bit" */
@@ -809,19 +809,23 @@ int main(void)
     	  #ifdef LANG_EN
     	  NDK_ScrDispString(112,0,gRCP.rcp_tech_company,0);
     	  NDK_ScrDispString(12,48,"1.Alipay",0);
-    	  NDK_ScrDispString(12,78,"2.Query By SN",0);
-    	  NDK_ScrDispString(12,108,"3.TRANS 24h",0);
-    	  NDK_ScrDispString(185,48,"4.Sign In",0);
-    	  NDK_ScrDispString(185,78,"5.Sign Out",0);    	  
+    	  #ifdef BAIDU_EN
+    	  NDK_ScrDispString(12,78,"2.WeChat",0);
+    	  NDK_ScrDispString(12,108,"3.Baidu",0);    	  
+    	  #endif
+    	  NDK_ScrDispString(12,138,"4.Query By SN",0);
+    	  NDK_ScrDispString(185,48,"5.TRANS 24h",0);
+    	  NDK_ScrDispString(185,78,"6.Sign In",0);
+    	  NDK_ScrDispString(185,108,"7.Sign Out",0);    	  
 
     #ifdef CONFIG_INPUTKEY
     	  NDK_ScrDispString(185,108,"6.Settings",0);    	  
     #endif	
     #ifdef BARCODE_EN
-        NDK_ScrDispString(185,108,"6.Barcode",0);    
+        NDK_ScrDispString(185,138,"8.Barcode",0);    
     #endif  
     #ifdef REFUND_EN
-        NDK_ScrDispString(185,108,"6.Refund",0);
+        NDK_ScrDispString(185,138,"8.Refund",0);
     #endif
         #else
     	  NDK_ScrDispString(112,0,gRCP.rcp_tech_company,0);
@@ -837,7 +841,7 @@ int main(void)
     #endif	
         NDK_ScrDispString(185,78,"6.签到",0); 
     #ifdef REFUND_EN
-        NDK_ScrDispString(185,168,"9.退款",0);    
+        NDK_ScrDispString(185,138,"8.退款",0);    
     #endif   
         NDK_ScrDispString(185,108,"7.结算签退",0);
     #ifdef BARCODE_EN 
@@ -979,8 +983,8 @@ int main(void)
 				        	  	NDK_ScrClrs();
 				        	  	if(display_mode > 0) { 
 				        	  		  #ifdef LANG_EN
-				        	  	    NDK_ScrDispString(0, line_height, "Press Enter key when completed",0);
-				        	  	    NDK_ScrDispString(font_width, line_height * 3, "Input money here:",0);				        	  		  
+				        	  	    NDK_ScrDispString(0, 0, "Press Enter key when completed",0);
+				        	  	    NDK_ScrDispString(font_width, line_height * 2, "Input money here:",0);				        	  		  
 				        	  		  #else
 				        	  	    NDK_ScrDispString(font_width * 2, line_height, "输入完成请按确认键",0);
 				        	  	    NDK_ScrDispString(font_width * 3, line_height * 2, "请输入金额:",0);
@@ -1055,7 +1059,7 @@ int main(void)
 			    	    NDK_ScrClrs();
 			    	    if(display_mode > 0) {
                     #ifdef LANG_EN
-			    	        NDK_ScrDispString(font_width * 2, 0, "Pay by Weixin Wallet",0);
+			    	        NDK_ScrDispString(font_width * 2, 0, "Pay by WeChat Wallet",0);
 				            NDK_ScrDispString(font_width, line_height * 2 , "Press OK to input money",0);
 				            NDK_ScrDispString(font_width, line_height * 3, "Press CANCEL/BACK key to return",0);                    
                     #else			    	    	
@@ -1087,8 +1091,8 @@ int main(void)
 				        	  	NDK_ScrClrs();
 				        	  	if(display_mode > 0) { 
 				        	  		  #ifdef LANG_EN
-				        	  	    NDK_ScrDispString(0, line_height, "Press Enter key when completed",0);
-				        	  	    NDK_ScrDispString(font_width, line_height * 3, "Input money here:",0);				        	  		  
+				        	  	    NDK_ScrDispString(0, 0, "Press Enter key when completed",0);
+				        	  	    NDK_ScrDispString(font_width, line_height * 2, "Input money here:",0);				        	  		  
 				        	  		  #else
 				        	  	    NDK_ScrDispString(font_width * 2, line_height, "输入完成请按确认键",0);
 				        	  	    NDK_ScrDispString(font_width * 3, line_height * 2, "请输入金额:",0);
@@ -1181,8 +1185,8 @@ int main(void)
 				        	  	NDK_ScrClrs();
 				        	  	if(display_mode > 0) { 
 				        	  		  #ifdef LANG_EN
-				        	  	    NDK_ScrDispString(0, line_height, "Press Enter key when completed",0);
-				        	  	    NDK_ScrDispString(font_width, line_height * 3, "Input money here:",0);				        	  		  
+				        	  	    NDK_ScrDispString(0, 0, "Press Enter key when completed",0);
+				        	  	    NDK_ScrDispString(font_width, line_height * 2, "Input money here:",0);				        	  		  
 				        	  		  #else
 				        	  	    NDK_ScrDispString(font_width * 2, line_height, "输入完成请按确认键",0);
 				        	  	    NDK_ScrDispString(font_width * 3, line_height * 2, "请输入金额:",0);
@@ -1263,7 +1267,7 @@ int main(void)
           	break;
 #endif
 #ifdef REFUND_EN
-          case K_NINE:
+          case K_EIGHT:
           	refund(pipe_fd);
           	break;
 #endif 
@@ -1555,7 +1559,12 @@ START_PRINT:
       strcpy(PrintBuff,"    支付宝钱包支付\n");
     NDK_PrnStr(PrintBuff);
     #ifdef LANG_EN
-    strcpy(PrintBuff,"  Pay By Alipay Wallet");
+    if(payment_channel == 1)
+    	strcpy(PrintBuff,"  Pay By Baidu Wallet");
+    else if(payment_channel == 2)
+    	strcpy(PrintBuff,"  Pay By WeChat Wallet");    	
+    else
+      strcpy(PrintBuff,"  Pay By Alipay Wallet");
     NDK_PrnStr(PrintBuff);
     #endif
 #else
@@ -1590,7 +1599,7 @@ end1:
     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
     NDK_ScrClrs(); 
     #ifdef LANG_EN
-    NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);    
     #else                                                                                                                                                                                                                                                                                                                                     
     NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
@@ -1608,7 +1617,7 @@ end2:
     NDK_ScrClrs();
     #ifdef LANG_EN
     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
-    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "Print Failed",0);    
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);    
     #else                                                                                                                                                                                                                                                                                                                                      
     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
@@ -1799,7 +1808,7 @@ end1:
     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
     NDK_ScrClrs();
     #ifdef LANG_EN
-    NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);    
     #else                                                                                                                                                                                                                                                                                                                                      
     NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
@@ -1816,7 +1825,7 @@ end2:
     NDK_ScrClrs();
     #ifdef LANG_EN
     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
-    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "Print Failed",0);    
+    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);    
     #else                                                                                                                                                                                                                                                                                                                                      
     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
@@ -1859,7 +1868,8 @@ end2:
         #ifdef BAIDU_EN
         if(payment_channel == 1)
         	NDK_ScrDispString(24, 24, "Baidu Connect Failed",0);
-        else	
+        else if(payment_channel == 2)
+        	NDK_ScrDispString(24, 24, "WeChat Connect Failed",0);
         #endif	
           NDK_ScrDispString(24, 24, "Alipay Connect Failed",0);
         NDK_ScrDispString(36, 36, "Check your Network",0);        
@@ -1976,8 +1986,13 @@ void *rcv_fn(void *arg)
                 /* Indicate the receipt will be printed out */
                 NDK_ScrPush();
                 NDK_ScrClrs();
+                #ifdef LANG_EN
+                NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "TRANS OK",0);
+                NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "Print Receipt",0);                
+                #else
                 NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "交易成功",0);
-                NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印回单",0);
+                NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印回单",0);                
+                #endif
                 NDK_ScrRefresh(); 
                 NDK_KbGetCode(2, &ucKey); 
                 NDK_ScrPop();
@@ -2034,17 +2049,27 @@ void *rcv_fn(void *arg)
             
                     NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
                     #ifdef LANG_EN
-                    strcpy(PrintBuff,"ALIPAY RECEIPT\n");                    
-                    NDK_PrnStr(PrintBuff);
                     #ifdef BAIDU_EN
-                    if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)
+                    if(strncmp(pos_receipt.pay_channel,"bai",3) == 0){
+                    	strcpy(PrintBuff,"BAIDU RECEIPT\n");
+                      NDK_PrnStr(PrintBuff);                    	
                     	strcpy(PrintBuff,"百度钱包交易凭条");
-                    else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+                    	NDK_PrnStr(PrintBuff); 
+                    }                    	
+                    else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0){
+                    	strcpy(PrintBuff,"WECHAT RECEIPT\n");
+                      NDK_PrnStr(PrintBuff);                    	
                     	strcpy(PrintBuff,"微信钱包交易凭条");	
+                    	NDK_PrnStr(PrintBuff);                    	
+                    }	
                     else
-                    #endif		
-                      strcpy(PrintBuff,"支付宝交易凭条");
+                    #endif
+                    {	
+                    strcpy(PrintBuff,"ALIPAY RECEIPT\n");                    
+                    NDK_PrnStr(PrintBuff);                    	
+                    strcpy(PrintBuff,"支付宝交易凭条");
                     NDK_PrnStr(PrintBuff);
+                    }
                     NDK_PrnStr("\n\n\n");
             
                     strcpy(PrintBuff,"序列号(SN)：\n");
@@ -2235,9 +2260,14 @@ void *rcv_fn(void *arg)
             end1:
             
                     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                    NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                    NDK_ScrClrs(); 
+                    #ifdef LANG_EN
+                    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+                    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);        
+                    #else                                                                                                                                                                                                                                                                                                                                                         
                     NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
                     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
+                    #endif
                     NDK_ScrRefresh(); 
                     NDK_KbGetCode(0, &ucKey);
             
@@ -2246,9 +2276,14 @@ void *rcv_fn(void *arg)
             end2:
             
                     NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                    NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                    NDK_ScrClrs(); 
+                    #ifdef LANG_EN
+                    NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
+                    NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);         
+                    #else                                                                                                                                                                                                                                                                                                                                                          
                     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-                    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
+                    NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
+                    #endif 
                     NDK_ScrRefresh(); 
                     NDK_KbGetCode(0, &ucKey);
                     goto START_PRINT;  
@@ -2327,8 +2362,8 @@ void querySingle(void)
     if (display_mode > 0) 
     {
     	  #ifdef LANG_EN
-        NDK_ScrDispString(font_width * 2, line_height, "Input the last six",0);
-        NDK_ScrDispString(font_width * 2, line_height * 2, "digits of SN to query\n",0);    	  
+        NDK_ScrDispString(font_width , line_height, "Input the last six",0);
+        NDK_ScrDispString(font_width , line_height * 2, "digits of SN to query\n",0);    	  
     	  #else
         NDK_ScrDispString(font_width * 2, line_height, "请输入交易单上序列号",0);
         NDK_ScrDispString(font_width * 2, line_height * 2, "的后6位查询当日交易\n",0);
@@ -2369,7 +2404,7 @@ void querySingle(void)
         char PrintBuff[30];
         NDK_ScrClrs();
         #ifdef LANG_EN
-        NDK_ScrDispString(0, font_height * 2, "TRANS SUCCESS",0);
+        NDK_ScrDispString(0, font_height, "TRANS IS SUCCESSFUL",0);
         #else
         NDK_ScrDispString(0, font_height * 2, "该单交易已成功",0);
         #endif
@@ -2391,10 +2426,12 @@ START_PRINT:
         #ifdef LANG_EN
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
-        if(strncmp(commTestOut.refund_status, "ACCEPT",6) != 0 )
-        	  strcpy(PrintBuff,"BELOW REFUND IS SUCCESS\n\n\n");
+        if(strncmp(commTestOut.refund_status, "SUCCESS",7) == 0 ) 
+        	  strcpy(PrintBuff,"BELOW REFUND ACCEPTED\n\n\n");        
+        else if(strncmp(commTestOut.refund_status, "ACCEPT",6) == 0 )
+        	  strcpy(PrintBuff,"BELOW REFUND IS SUCCESSFUL\n\n\n");
         else	
-            strcpy(PrintBuff,"BELOW TRANS IS SUCCESS\n\n\n");
+            strcpy(PrintBuff,"BELOW TRANS IS SUCCESSFUL\n\n\n");
         NDK_PrnStr(PrintBuff);
 
         strcpy(PrintBuff,"序列号SN:\n");
@@ -2427,7 +2464,9 @@ START_PRINT:
         #ifdef BAIDU_EN
         strcpy(PrintBuff,"支付通道CHANNEL：\n");
         if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
-           strcat(PrintBuff, "BAIFUBAO");
+           strcat(PrintBuff, "BAIDU");
+        else if(strncmp(commTestOut.pay_channel,"wei",3) == 0)
+        	 strcat(PrintBuff, "WECHAT");
         else
         	 strcat(PrintBuff, "ALIPAY");          
         NDK_PrnStr(PrintBuff);
@@ -2515,7 +2554,7 @@ end1:
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();
         #ifdef LANG_EN
-        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);        
         #else                                                                                                                                                                                                                                                                                                                                      
         NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
@@ -2532,7 +2571,7 @@ end2:
         NDK_ScrClrs(); 
         #ifdef LANG_EN
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "Print Failed",0);         
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);         
         #else                                                                                                                                                                                                                                                                                                                                     
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
         NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
@@ -2571,7 +2610,7 @@ void qrexchange(void)
     strftime(order_time,sizeof(order_time),"%Y-%m-%d|%H:%M:%S",ptr);        
     NDK_ScrClrs();
     #ifdef LANG_EN
-    NDK_ScrDispString(width/2 - font_width, font_height, "Sign In",0);
+    NDK_ScrDispString(width/2 - font_width * 2, font_height, "Sign In",0);
     #else
     NDK_ScrDispString(width/2 - font_width, font_height, "签到",0);
     #endif
@@ -2590,10 +2629,10 @@ START_PRINT:
 
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
         #ifdef LANG_EN
-        strcpy(PrintBuff,"Sign In OK\n");
+        strcpy(PrintBuff,"Signed In\n");
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");
-        strcpy(PrintBuff,"起始时间:\n");
+        strcpy(PrintBuff,"起始时间(TIME):\n");
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");        
         #else
@@ -2629,9 +2668,14 @@ START_PRINT:
 end1:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrClrs(); 
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                         
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);         
+        #else                                                                                                                                                                                                                                                                                                                                              
         NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
+        #endif
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
         return; 
@@ -2640,9 +2684,14 @@ end1:
 end2:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrClrs(); 
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);         
+        #else                                                                                                                                                                                                                                                                                                                                              
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
         NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
+        #endif
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
         return;
@@ -2838,7 +2887,26 @@ START_PRINT:
         strcpy(PrintBuff,"AMOUNT：");
         strcat(PrintBuff, pos_receipt.total_fee);
         NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");	   
+        NDK_PrnStr("\n");	
+        #ifdef REFUND_EN
+        if(strncmp(pos_receipt.refund_amount, "0.00",4) != 0 ) {
+            strcpy(PrintBuff,"REFUND AMOUNT：");
+            strcat(PrintBuff, pos_receipt.refund_amount);        
+            NDK_PrnStr(PrintBuff);
+            NDK_PrnStr("\n");        	
+        }
+        #endif	        
+        #ifdef BAIDU_EN
+        strcpy(PrintBuff,"CHANNEL：");
+        if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)        	
+           strcat(PrintBuff, "BAIDU");
+        else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+        	 strcat(PrintBuff, "WeChat");
+        else 	 
+        	 strcat(PrintBuff, "ALIPAY");          
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");        
+        #endif            
         strcpy(PrintBuff,"------------------\n");
         NDK_PrnStr(PrintBuff);        
         #else
@@ -3009,7 +3077,7 @@ end1:
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
      NDK_ScrClrs(); 
      #ifdef LANG_EN
-     NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
      NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);     
      #else                                                                                                                                                                                                                                                                                                                                     
      NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
@@ -3026,7 +3094,7 @@ end2:
      NDK_ScrClrs();
      #ifdef LANG_EN
      NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "Print Failed",0);     
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);     
      #else                                                                                                                                                                                                                                                                                                                                      
      NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
      NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
@@ -3058,8 +3126,12 @@ int qrexchangedorder(void)
     char total24h_feestr[17] = {0};
     char temp_feestr[17] = {0};
 
-    NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+    NDK_ScrClrs();  
+    #ifdef LANG_EN
+    NDK_ScrDispString(width/2 - font_width * 2, 0, "Sign Out", 0);
+    #else                                                                                                                                                                                                                                                                                                                                    
     NDK_ScrDispString(width/2 - font_width * 3, 0, "结算（签退）", 0);
+    #endif
     NDK_ScrRefresh();
     //ret = alipay_query_24h(result24h);
     memset(result24h, 0, sizeof(result24h));
@@ -3070,17 +3142,33 @@ int qrexchangedorder(void)
     trade_num = SplitStr(result24h,trade_ptr,"|");
 
     NDK_ScrClrs();
+    #ifdef LANG_EN
+    NDK_ScrDispString(0, 0, "Signed In Time", 0);
+    #else
     NDK_ScrDispString(font_width * 3, 0, "签到时间", 0);
+    #endif
     NDK_ScrDispString(0, font_height, exchange2date(commTestOut.exchange_start_time), 0);
 
 #ifdef REFUND_EN
-    sprintf(showbuf, "单数：%d,总额：%s",trade_num,commTestOut.amount_total);
+    #ifdef LANG_EN
+    sprintf(showbuf, "TRANS：%d,AMOUNT TOTAL：%s",trade_num,commTestOut.amount_total);
+    #else
+    sprintf(showbuf, "单数：%d,总金额：%s",trade_num,commTestOut.amount_total);
+    #endif    
 #else
-    sprintf(showbuf, "单数：%d,总额：%s",commTestOut.order_total,commTestOut.amount_total);
+    #ifdef LANG_EN
+    sprintf(showbuf, "TRANS：%d,AMOUNT TOTAL：%s",commTestOut.order_total,commTestOut.amount_total);
+    #else
+    sprintf(showbuf, "单数：%d,总金额：%s",commTestOut.order_total,commTestOut.amount_total);
+    #endif
 #endif
     NDK_ScrDispString(0, font_height * 2, showbuf, 0);
     //NDK_ScrDispString(36, 36, "是否打印?", 0);
+    #ifdef LANG_EN
+    NDK_ScrDispString(0, font_height * 3, "Print? 1:YES  Other KEY:NO", 0);    
+    #else
     NDK_ScrDispString(0, font_height * 3, "打印? 1.是  其他键.否", 0);
+    #endif
     NDK_ScrRefresh();
 
     NDK_KbGetCode(0, &ucKey);
@@ -3108,13 +3196,23 @@ START_PRINT:
     NDK_PrnStr(PrintBuff);
     NDK_PrnStr("\n");	   
 
+    #ifdef LANG_EN
+    strcpy(PrintBuff,"Sign In Time：");
+    strcat(PrintBuff,exchange2date(commTestOut.exchange_start_time));
+    NDK_PrnStr(PrintBuff);
+    NDK_PrnStr("\n");
+    strcpy(PrintBuff,"Sign Out Time：");
+    strcat(PrintBuff,exchange2date(commTestOut.exchange_end_time));
+    NDK_PrnStr(PrintBuff);
+    #else
     strcpy(PrintBuff,"签到时间：");
     strcat(PrintBuff,exchange2date(commTestOut.exchange_start_time));
     NDK_PrnStr(PrintBuff);
     NDK_PrnStr("\n");
     strcpy(PrintBuff,"签退时间：");
     strcat(PrintBuff,exchange2date(commTestOut.exchange_end_time));
-    NDK_PrnStr(PrintBuff);
+    NDK_PrnStr(PrintBuff);    
+    #endif
     NDK_PrnStr("\n\n");
 
     strcpy(PrintBuff,"------------------\n");
@@ -3168,13 +3266,40 @@ START_PRINT:
         if (i == commTestOut.order_total) {
         //syslogd(LOG_INFO, "print refund list below, the list number is %d\n",trade_num - i);
         printf("print refund list below, the list number is %d\n",trade_num - i);
-        NDK_PrnStr("\n\n");	 
+        NDK_PrnStr("\n\n");	
+        #ifdef LANG_EN
+        strcpy(PrintBuff,"Below is refund list:\n");
+        #else          
         strcpy(PrintBuff,"如下为退款记录:\n");
+        #endif
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr(" \n");	 
         } 
 #endif
 
+        #ifdef LANG_EN
+        printf("total24h_fee:%d", total24h_fee);
+        strcpy(PrintBuff,"TIME：");
+        strcat(PrintBuff, serial2date(pos_receipt.serial_number));
+        NDK_PrnStr(PrintBuff);	
+        NDK_PrnStr("\n");   
+        strcpy(PrintBuff,"SN：");
+        strcat(PrintBuff, pos_receipt.serial_number);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");	   
+        strcpy(PrintBuff,"ORDER No：");
+        strcat(PrintBuff, pos_receipt.out_trade_no);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");	   
+        strcpy(PrintBuff,"TRANS No：");
+        strcat(PrintBuff,  pos_receipt.trade_no);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");	   
+        strcpy(PrintBuff,"AMOUNT：");
+        strcat(PrintBuff, pos_receipt.total_fee);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+        #else
         printf("total24h_fee:%d", total24h_fee);
         strcpy(PrintBuff,"时间：");
         strcat(PrintBuff, serial2date(pos_receipt.serial_number));
@@ -3195,16 +3320,32 @@ START_PRINT:
         strcpy(PrintBuff,"金额：");
         strcat(PrintBuff, pos_receipt.total_fee);
         NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");	
+        NDK_PrnStr("\n");        
+        #endif	
         #ifdef REFUND_EN
         if(strncmp(pos_receipt.refund_amount, "0.00",4) != 0 ) {
+        	  #ifdef LANG_EN
+        	  strcpy(PrintBuff,"REFUND AMOUNT：");
+        	  #else
             strcpy(PrintBuff,"退款金额：");
+            #endif
             strcat(PrintBuff, pos_receipt.refund_amount);        
             NDK_PrnStr(PrintBuff);
             NDK_PrnStr("\n");        	
         }
         #endif	        
-        #ifdef BAIDU_EN
+#ifdef BAIDU_EN
+        #ifdef LANG_EN
+        strcpy(PrintBuff,"CHANNEL：");
+        if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)        	
+           strcat(PrintBuff, "BAIDU");
+        else if(strncmp(pos_receipt.pay_channel,"wei",3) == 0)
+        	 strcat(PrintBuff, "WeChat");
+        else 	 
+        	 strcat(PrintBuff, "ALIPAY");          
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");        
+        #else
         strcpy(PrintBuff,"支付通道：");
         if(strncmp(pos_receipt.pay_channel,"bai",3) == 0)        	
            strcat(PrintBuff, "百度钱包");
@@ -3213,8 +3354,9 @@ START_PRINT:
         else 	 
         	 strcat(PrintBuff, "支付宝钱包");          
         NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");        
-        #endif           
+        NDK_PrnStr("\n");
+        #endif        
+#endif           
         strcpy(PrintBuff,"------------------\n");
         NDK_PrnStr(PrintBuff);
         if(i%5 == 0)  {
@@ -3281,12 +3423,20 @@ START_PRINT:
     DebugErrorInfo("\nafter:%s\n", total24h_feestr);
     }
 #endif
-    strcpy(PrintBuff,"总金额：");
+    #ifdef LANG_EN
+    strcpy(PrintBuff,"AMOUNT TOTAL：");    
+    #else
+    strcpy(PrintBuff,"总金额：");    
+    #endif
     strcat(PrintBuff, total24h_feestr);
     NDK_PrnStr(PrintBuff);	
     NDK_PrnStr("\n");   
     //memset(PrintBuff,0,sizeof(PrintBuff));
+    #ifdef LANG_EN
+    sprintf(trade_numstr, "TRANS SUM:%d", trade_num);    
+    #else
     sprintf(trade_numstr, "总单数:%d", trade_num);
+    #endif
     strcpy(PrintBuff, trade_numstr);
     NDK_PrnStr(PrintBuff);
     NDK_PrnStr("\n");	   
@@ -3294,11 +3444,19 @@ START_PRINT:
     /* use temp_feestr as the string of refund money */
     sprintf(temp_feestr,"%d", total24h_refund);
     Moneyformat(temp_feestr);
+    #ifdef LANG_EN
+    strcpy(PrintBuff,"REFUND AMOUNT TOTAL:");
+    #else
     strcpy(PrintBuff,"总退款金额:");
+    #endif
     strcat(PrintBuff, temp_feestr);
     NDK_PrnStr(PrintBuff);
     NDK_PrnStr("\n");
+    #ifdef LANG_EN
+    sprintf(trade_numstr,"REFUND SUM:%d", trade_num - commTestOut.order_total);    
+    #else
     sprintf(trade_numstr,"总退款单数:%d", trade_num - commTestOut.order_total);
+    #endif
     strcpy(PrintBuff, trade_numstr);
     NDK_PrnStr(PrintBuff);
     NDK_PrnStr("\n");
@@ -3322,9 +3480,14 @@ START_PRINT:
 end1:
 	                                                                                                                                                                                                                                                                                                                                                     
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+     NDK_ScrClrs();
+     #ifdef LANG_EN
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);     
+     #else                                                                                                                                                                                                                                                                                                                                            
      NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
+     #endif 
      NDK_ScrRefresh(); 
      NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
      return -1; 
@@ -3333,9 +3496,14 @@ end1:
 end2:
 	                                                                                                                                                                                                                                                                                                                                                     
      NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-     NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+     NDK_ScrClrs();
+     #ifdef LANG_EN
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
+     NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);     
+     #else                                                                                                                                                                                                                                                                                                                                           
      NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
+     NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
+     #endif 
      NDK_ScrRefresh(); 
      NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
      return -1;
@@ -3358,6 +3526,15 @@ void InitReceipt()
             return;
         }
         /*adapted to newland pos printer */
+        #ifdef LANG_EN
+        strcpy(gRCP.rcp_title_line1,"  Receipt");
+        strcpy(gRCP.rcp_title_line2,"    Title");
+        strcpy(gRCP.rcp_title_address,"          Address Info");
+        strcpy(gRCP.rcp_title_number,"          Phone Call");
+        strcpy(gRCP.rcp_title_company,"Company"); 
+        strcpy(gRCP.rcp_tech_company,"E-richpay");
+        strcpy(gRCP.rcp_tech_number,"4008190900");        
+        #else
         strcpy(gRCP.rcp_title_line1,"  小票标题");
         strcpy(gRCP.rcp_title_line2,"    Title");
         strcpy(gRCP.rcp_title_address,"          公司地址信息");
@@ -3365,14 +3542,20 @@ void InitReceipt()
         strcpy(gRCP.rcp_title_company,"公司名称"); 
         strcpy(gRCP.rcp_tech_company,"盈润捷通");
         strcpy(gRCP.rcp_tech_number,"4008190900");
+        #endif
                
         if( !fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fp) )
         {
             DebugErrorInfo("Error write test-receipt.dat\n");
             NDK_SysBeep();
 	   	      NDK_ScrClrs();
+	   	      #ifdef LANG_EN
+	   	      NDK_ScrDispString(24, 24, "HW ERROR",0);
+	   	      NDK_ScrDispString(24, 36, "REBOOT MANUALLY",0); 	   	      
+	   	      #else
 	   	      NDK_ScrDispString(24, 24, "机器硬件出错",0);
 	   	      NDK_ScrDispString(24, 36, "请重启机器",0); 
+	   	      #endif
             NDK_ScrRefresh();
             fclose(receipt_fp);
             return ;
@@ -3402,6 +3585,17 @@ int SetReceiptInfo()
 
         NDK_ScrClrs();
         if(display_mode > 0) {
+        	  #ifdef LANG_EN
+            NDK_ScrDispString(width/2 - font_width * 4,0,"Receipt Settings",0);
+            
+            NDK_ScrDispString(12,48,"1.Title1",0);
+    	      NDK_ScrDispString(12,78,"2.Title2",0);
+    	      NDK_ScrDispString(12,108,"3.Address",0);
+    	      NDK_ScrDispString(185,48,"4.Phone",0);
+    	      NDK_ScrDispString(185,78,"5.Company",0);
+    	      NDK_ScrDispString(185,108,"6.Support",0);
+    	      NDK_ScrDispString(185,138,"7.Hotline",0);        	  
+        	  #else
             NDK_ScrDispString(width/2 - font_width * 2,0,"小票设置",0);
             
             NDK_ScrDispString(12,48,"1.标题1",0);
@@ -3411,6 +3605,7 @@ int SetReceiptInfo()
     	      NDK_ScrDispString(185,78,"5.公司名称",0);
     	      NDK_ScrDispString(185,108,"6.技术支持",0);
     	      NDK_ScrDispString(185,138,"7.支持电话",0);
+    	      #endif
     	  }
     	  else 
     	  {
@@ -3443,7 +3638,11 @@ int SetReceiptInfo()
             while(1)
             {
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change title text of receipt:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入小票标题第一行:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3467,7 +3666,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3481,16 +3684,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs(); 
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                     
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
                       NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      #endif
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0); 
+                 #endif                                                                                                                                            
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  break;   
@@ -3508,7 +3720,11 @@ int SetReceiptInfo()
             while(1)
             {
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change second text line of receipt:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入小票标题第二行:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3533,7 +3749,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                     
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3547,16 +3767,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs(); 
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                                            
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
                       NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      #endif
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs(); 
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                                       
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0); 
+                 #endif                                                                                                                                            
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  break;   
@@ -3575,7 +3804,11 @@ int SetReceiptInfo()
             while(1)
             {
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change address info in receipt:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入小票上地址信息:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3599,7 +3832,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                     
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3613,16 +3850,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs();  
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                                          
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
                       NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      #endif
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                                       
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);
+                 #endif                                                                                                                                             
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  break;
@@ -3641,7 +3887,11 @@ int SetReceiptInfo()
             {
             
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change merchant's phone call in receipt:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入小票上电话信息:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3665,7 +3915,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                     
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3679,16 +3933,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs();
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                                             
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0);
+                      #endif
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs(); 
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                                       
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);
+                 #endif                                                                                                                                             
                  NDK_ScrRefresh();
                  NDK_KbGetCode(2, &ucKey); 
                  break;             
@@ -3708,7 +3971,11 @@ int SetReceiptInfo()
             {
             
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change merchant's name in receipt:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入日结单上公司名称:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3732,7 +3999,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                      
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3746,16 +4017,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs(); 
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                                           
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
-                      NDK_ScrRefresh(); 
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0);
+                      #endif  
+                      NDK_ScrRefresh();
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                                       
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);
+                 #endif                                                                                                                                             
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  break;
@@ -3775,7 +4055,11 @@ int SetReceiptInfo()
             {
             
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change company name of tech support:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入技术支持公司简称:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3791,7 +4075,11 @@ int SetReceiptInfo()
             
                  //sprintf(buff, "%s", "12345");
                  //ret = Input(4,6, buff,16, IME_CHINESE, BLACK, GREEN, FALSE, FALSE, TRUE);
-                 ret = NDK_KbHZInput(buff, 8, IME_NUMPY); 
+                 #ifdef LANG_EN
+                 ret = NDK_KbHZInput(buff, 16, IME_ENGLISH);
+                 #else
+                 ret = NDK_KbHZInput(buff, 8, IME_NUMPY);
+                 #endif 
                  if(ret != NDK_OK)
                  {
                     DebugErrorInfo("input ret=[%d]\n", ret);               	
@@ -3799,7 +4087,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                     
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3813,16 +4105,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs();
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                      
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0);
+                      #endif 
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs(); 
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                     
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);
+                 #endif                                                                                                                                             
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  
@@ -3842,7 +4143,11 @@ int SetReceiptInfo()
 	   	               return; 
 	               }	            	
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change phone call of tech support:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入技术支持电话:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3866,7 +4171,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                      
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10); 
                      fclose(receipt_fb);                
@@ -3881,17 +4190,26 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs();
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                                            
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
-                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0);
+                      #endif 
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }
   
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                                       
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0); 
+                 #endif                                                                                                                                            
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  break;                          
@@ -3913,7 +4231,11 @@ int SetReceiptInfo()
                  if(display_mode == 0)
                  	   break;
                  NDK_ScrClrs();
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(0, 0, "Change phone call of tech support:",0);
+                 #else
                  NDK_ScrDispString(0, 0, "请输入技术支持电话:",0);
+                 #endif
                  NDK_ScrRefresh();
             
                  //TextOut(0, 5, ALIGN_CENTER, "最多输入8个汉字或者16个英文字符和符号");
@@ -3937,7 +4259,11 @@ int SetReceiptInfo()
                  }     
                  if(strlen(buff) == 0){
                      NDK_ScrClrs();
+                     #ifdef LANG_EN
+                     NDK_ScrDispString(font_width * 2, font_height * 2, "Can't be empty",0);
+                     #else                     
                      NDK_ScrDispString(font_width * 2, font_height * 2, "输入不能为空",0);
+                     #endif
                      NDK_ScrRefresh();
                      NDK_SysDelay(10);                 
                      continue;
@@ -3951,16 +4277,25 @@ int SetReceiptInfo()
                  //NDK_KbGetCode(0, &ucKey);
                  if(!fwrite(&gRCP, sizeof(T_RECEIPT), 1, receipt_fb))
                  {                                                                                                                                                                                                                                                                                                                                                                     
-                      NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+                      NDK_ScrClrs();
+                      #ifdef LANG_EN
+                      NDK_ScrDispString(font_width * 2, font_height * 2, "Failed to save",0);                                                                                                                                                                                                                                                                                                          
+                      NDK_ScrDispString(font_width * 2, font_height * 3, "Try later",0);                      
+                      #else                                                                                                                                                                                                                                                                                                                                       
                       NDK_ScrDispString(font_width * 2, font_height * 2, "保存文件出错",0);                                                                                                                                                                                                                                                                                                          
                       NDK_ScrDispString(font_width * 2, font_height * 3, "请稍后重试",0); 
+                      #endif
                       NDK_ScrRefresh(); 
                       NDK_KbGetCode(2, &ucKey);
                       goto FAILED;
                  }     
 	   	           //NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-                 NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);                                                                                                                                             
+                 NDK_ScrClrs(); 
+                 #ifdef LANG_EN
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "Applied",0); 
+                 #else                                                                                                                                                                                                                                                                                                                                                      
+                 NDK_ScrDispString(font_width * 3, font_height * 2, "设置成功!",0);
+                 #endif                                                                                                                                             
                  NDK_ScrRefresh(); 
                  NDK_KbGetCode(2, &ucKey);
                  break;
@@ -3989,6 +4324,16 @@ int PaySettings()
 	  {
         NDK_ScrClrs();
         if(display_mode > 0) {
+        	  #ifdef LANG_EN
+            NDK_ScrDispString(width/2 - font_width * 2,0,"Settings",0);
+            
+            NDK_ScrDispString(12,48,"1.Device",0);    	         	      
+    	      NDK_ScrDispString(12,78,"2.Receipt",0);
+    	      NDK_ScrDispString(12,108,"3.Network",0);
+    	      #ifdef ETHERNET_EN
+    	      NDK_ScrDispString(12,138,"4.Merchant",0);
+    	      #endif        	  
+        	  #else //LANG_EN
             NDK_ScrDispString(width/2 - font_width,0,"设置",0);
             
             NDK_ScrDispString(12,48,"1.设备信息",0);    	         	      
@@ -3997,6 +4342,7 @@ int PaySettings()
     	      #ifdef ETHERNET_EN
     	      NDK_ScrDispString(12,138,"4.商户参数",0);
     	      #endif
+    	      #endif //LANG_EN
     	      
     	  }
     	  else 
@@ -4031,7 +4377,11 @@ int PaySettings()
              NDK_ScrClrs();
              NDK_ScrDispString(0, font_height, "IMSI:",0);
              NDK_ScrDispString(0, font_height * 2, pos_imsi, 0);
+             #ifdef LANG_EN
+             NDK_ScrDispString(0, font_height * 3, "Ver:",0);
+             #else
              NDK_ScrDispString(0, font_height * 3, "版本:",0);
+             #endif
              NDK_ScrDispString(0, font_height * 4, pos_ver, 0);
 //             ret = NDK_AppGetInfo(NULL,0,&PayAppInfo, sizeof(PayAppInfo));
 //             if (ret == NDK_OK && strlen(PayAppInfo.szVerBuf) > 0){
@@ -4061,15 +4411,27 @@ int PaySettings()
         	   #ifdef ETHERNET_EN
         	   NDK_NetGetAddr(COMM_TYPE_ETH, posIp, NULL, NULL, NULL);
         	   NDK_ScrClrs();
+        	   #ifdef LANG_EN
+        	   NDK_ScrDispString(0, font_height, "Network Type:",0);
+        	   #else
         	   NDK_ScrDispString(0, font_height, "网络类型:",0);
+        	   #endif
         	   NDK_ScrDispString(0, font_height * 2, "ETHERNET", 0);
         	   #else
         	   NDK_NetGetAddr(COMM_TYPE_PPP, posIp, NULL, NULL, NULL);
         	   NDK_ScrClrs();
+        	   #ifdef LANG_EN
+        	   NDK_ScrDispString(0, font_height, "Network Type:",0);
+        	   #else        	   
         	   NDK_ScrDispString(0, font_height, "网络类型:",0);
+        	   #endif
         	   NDK_ScrDispString(0, font_height * 2, "PPP", 0);
         	   #endif
+        	   #ifdef LANG_EN
+        	   NDK_ScrDispString(0, font_height * 3, "IP Address:", 0);
+        	   #else
         	   NDK_ScrDispString(0, font_height * 3, "IP地址:", 0);
+        	   #endif
         	   NDK_ScrDispString(0, font_height * 4, posIp, 0);        	   
         	   NDK_ScrRefresh();
         	   
@@ -4111,7 +4473,11 @@ void barcodePay(int pipe_id)
     NDK_ScrClrs();
     if (display_mode > 0) 
     {
+    	  #ifdef LANG_EN
+    	  NDK_ScrDispString(font_width * 2, line_height, "INPUT MONEY\n",0);
+    	  #else
         NDK_ScrDispString(font_width * 2, line_height, "请输入付款金额\n",0);
+        #endif
         //NDK_ScrDispString(0, line_height * 2, "    ",0);	
     }
     else{                                                                                                                                                                                                                                                                                                                                      
@@ -4134,8 +4500,13 @@ void barcodePay(int pipe_id)
     NDK_ScrClrs();        
     if (display_mode > 0) 
     {
+    	  #ifdef LANG_EN
+        NDK_ScrDispString(font_width * 4, line_height, "Scan customer's",0);
+        NDK_ScrDispString(font_width * 4, line_height * 2, "payment barcode\n",0);    	  
+    	  #else
         NDK_ScrDispString(font_width * 4, line_height, "请输入付款码",0);
         NDK_ScrDispString(font_width * 4, line_height * 2, "或扫描付款码\n",0);
+        #endif
         NDK_ScrDispString(0, line_height * 3, "    ",0);	
     }
     else{                                                                                                                                                                                                                                                                                                                                      
@@ -4165,8 +4536,11 @@ void barcodePay(int pipe_id)
             if (invalid_code == 0){       	
                 NDK_ScrClrs();
                 buff[18] = '\0';
-                
+                #ifdef LANG_EN
+                NDK_ScrPrintf("  Payment Barcode Scanned\n");
+                #else
                 NDK_ScrPrintf("  付款码读取成功\n");
+                #endif
                 NDK_ScrPrintf("Number:%s\n",buff);            
                 NDK_ScrRefresh();
                 break;
@@ -4177,8 +4551,13 @@ void barcodePay(int pipe_id)
         }
         else{
         	  NDK_ScrClrs();
+        	  #ifdef LANG_EN
+        	  NDK_ScrDispString(font_width * 4, line_height, "Scanning...\n",0);
+        	  NDK_ScrDispString(font_width * 4, height - font_height * 2, "Press CANCEL to quit\n",0);        	  
+        	  #else
         	  NDK_ScrDispString(font_width * 4, line_height, "正在读取中...\n",0);
         	  NDK_ScrDispString(font_width * 4, height - font_height * 2, "按取消键退出\n",0);
+        	  #endif
         	  NDK_ScrRefresh();	
         	  NDK_KbGetCode(1, &ucKey);
         	  if(ucKey == K_ESC)
@@ -4209,12 +4588,20 @@ void barcodePay(int pipe_id)
     DebugErrorInfo("create_and_pay result is %c\n",commTestOut.is_success);
     if( commTestOut.is_success == 'T'){
     	   NDK_ScrClrs();
+    	   #ifdef LANG_EN
+    	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "TRANS Submitted",0);
+    	   #else
     	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "交易提交成功",0);
+    	   #endif
     	   NDK_ScrRefresh();
     }
     else{
     	   NDK_ScrClrs();
+    	   #ifdef LANG_EN
+    	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "TRANS FAILED",0);
+    	   #else
     	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "交易提交失败",0);
+    	   #endif
     	   NDK_ScrRefresh();
     	   NDK_KbGetCode(2, &ucKey);
     	   return;
@@ -4233,6 +4620,23 @@ START_PRINT:
         memset(PrintBuff,0,30);
 
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
+        #ifdef LANG_EN
+                strcpy(PrintBuff,"Barcode Payment Submitted \n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+        strcpy(PrintBuff,"时间TIME:\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+        strcpy(PrintBuff,order_time);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+        strcpy(PrintBuff,"序列号SN:\n");
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+        strcpy(PrintBuff,commTestOut.serial_number);
+        NDK_PrnStr(PrintBuff);
+        NDK_PrnStr("\n");
+        #else
         strcpy(PrintBuff,"付款码交易提交成功\n");
         NDK_PrnStr(PrintBuff);
         NDK_PrnStr("\n");
@@ -4247,7 +4651,8 @@ START_PRINT:
         NDK_PrnStr("\n");
         strcpy(PrintBuff,commTestOut.serial_number);
         NDK_PrnStr(PrintBuff);
-        NDK_PrnStr("\n");        
+        NDK_PrnStr("\n");
+        #endif        
 
         ret = NDK_PrnStart();
         
@@ -4271,8 +4676,13 @@ end1:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(24, 24, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(36, 36, "打印失败", 0); 
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);     
+        #else                                                                                                                                                                                                                                                                                                                                            
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
+        #endif 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);
         return; 
@@ -4281,8 +4691,13 @@ end2:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
         NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
-        NDK_ScrDispString(36, 24, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(24, 36, "无法执行打印",0); 
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);     
+        #else                                                                                                                                                                                                                                                                                                                                           
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
+        #endif 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
         return;
@@ -4313,7 +4728,11 @@ void refund(int pipe_id)
         NDK_ScrClrs();
         if (display_mode > 0) 
         {
+        	  #ifdef LANG_EN
+            NDK_ScrDispString(font_width * 2, line_height, "Password:\n",0);        	  
+        	  #else
             NDK_ScrDispString(font_width * 2, line_height, "请输入密码:\n",0);
+            #endif
             NDK_ScrDispString(0, line_height * 2, "    ",0);	
         }
         else{                                                                                                                                                                                                                                                                                                                                      
@@ -4333,8 +4752,12 @@ void refund(int pipe_id)
         if( NDK_IsDigitStr(numBuff) == NDK_OK && strcmp(numBuff, passBuff) == 0 )
         	break;
         	
-        NDK_ScrClrs();	
+        NDK_ScrClrs();
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Wrong Password！",0);
+        #else	
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "密码错误！",0);
+        #endif
         NDK_ScrRefresh();
         NDK_KbGetCode(2, &ucKey);
         	
@@ -4343,8 +4766,13 @@ void refund(int pipe_id)
     NDK_ScrClrs();
     if (display_mode > 0) 
     {
+    	  #ifdef LANG_EN
+        NDK_ScrDispString(font_width , line_height, "Input the last six",0);
+        NDK_ScrDispString(font_width , line_height * 2, "digits of SN to refund\n",0);    	  
+    	  #else    	
         NDK_ScrDispString(font_width * 2, line_height, "请输入交易单上序列号",0);
         NDK_ScrDispString(font_width * 2, line_height * 2, "的后6位退款\n",0);
+        #endif
         NDK_ScrDispString(0, line_height * 3, "    ",0);	
     }
     else{                                                                                                                                                                                                                                                                                                                                      
@@ -4371,7 +4799,11 @@ void refund(int pipe_id)
     NDK_ScrClrs();
     if (display_mode > 0) 
     {
+    	  #ifdef LANG_EN
+    	  NDK_ScrDispString(font_width * 2, line_height * 2, "Input Refund Amount",0);
+    	  #else
         NDK_ScrDispString(font_width * 3, line_height * 2, "请输入退款金额",0);
+        #endif
     }
     else{                                                                                                                                                                                                                                                                                                                                      
         NDK_ScrDispString(0, 12, "请输入退款金额",0);
@@ -4386,8 +4818,13 @@ void refund(int pipe_id)
     if(strncmp(queryNo, prefix, 5) != 0) {
     	
     	   NDK_ScrClrs();
+    	   #ifdef LANG_EN
+    	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "Refund Fail",0);
+    	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "Wrong SN！",0);    	   
+    	   #else
     	   NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "退款失败",0);
     	   NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "序列号错误！",0);
+    	   #endif
     	   NDK_ScrRefresh();
     	   NDK_KbGetCode(2, &ucKey);
     	   return;    	
@@ -4399,7 +4836,11 @@ void refund(int pipe_id)
     {
         char PrintBuff[30];
         NDK_ScrClrs();
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Refund OK",0);        
+        #else
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "退款成功",0);
+        #endif
         //NDK_ScrDispString(0, font_height * 3, queryNo,0);
         NDK_ScrRefresh(); 
         //write(pipe_id, "START", 6);
@@ -4413,13 +4854,60 @@ START_PRINT:
         memset(PrintBuff,0,30);
         NDK_PrnSetFont(PRN_HZ_FONT_32x32, PRN_ZM_FONT_16x32 );
         
-#ifdef BAIDU_EN	        	 
-        	 strcpy(PrintBuff,"退款操作提交成功\n\n\n");       	                 
+#ifdef BAIDU_EN	
+           #ifdef LANG_EN
+           strcpy(PrintBuff,"Refund Request Accepted\n\n\n");
+           #else        	 
+        	 strcpy(PrintBuff,"退款操作提交成功\n\n\n");
+        	 #endif       	                 
            NDK_PrnStr(PrintBuff);
 #else
-        	 strcpy(PrintBuff,"退款成功\n\n\n");        	                 
+           #ifdef LANG_EN
+           strcpy(PrintBuff,"Refund OK\n\n\n");
+           #else
+        	 strcpy(PrintBuff,"退款成功\n\n\n");
+        	 #endif        	                 
            NDK_PrnStr(PrintBuff);
-#endif           
+#endif  
+           #ifdef LANG_EN
+           strcpy(PrintBuff,"序列号(SN)：\n");
+           strcat(PrintBuff,queryNo);
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");
+                   
+           strcpy(PrintBuff,"交易时间(TIME):\n");
+           strcat(PrintBuff, serial2date(queryNo));        
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");	
+              
+           strcpy(PrintBuff,"商户订单号(ORDER No):\n");
+           strcat(PrintBuff,commTestOut.out_trade_no);
+           NDK_PrnStr(PrintBuff);	
+           NDK_PrnStr("\n");
+              
+           strcpy(PrintBuff,"总金额(AMOUNT)：\n");
+           strcat(PrintBuff, commTestOut.total_fee);        
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");
+           
+           strcpy(PrintBuff,"退款金额(REFUND AMOUNT)：\n");
+           strcat(PrintBuff, commTestOut.refund_amount);        
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n"); 
+
+#ifdef BAIDU_EN
+           strcpy(PrintBuff,"支付通道CHANNEL：\n");
+           if(strncmp(commTestOut.pay_channel,"bai",3) == 0)        	
+              strcat(PrintBuff, "BAIDU");
+           else if(strncmp(commTestOut.pay_channel,"wei",3) == 0)
+           	 strcat(PrintBuff, "WECHAT");
+           else
+           	 strcat(PrintBuff, "ALIPAY");          
+           NDK_PrnStr(PrintBuff);
+           NDK_PrnStr("\n");        
+#endif
+                                
+           #else //LANG_EN        
            strcpy(PrintBuff,"序列号:\n");
            strcat(PrintBuff,queryNo);
            NDK_PrnStr(PrintBuff);
@@ -4454,9 +4942,9 @@ START_PRINT:
            else
            	 strcat(PrintBuff, "支付宝钱包");          
            NDK_PrnStr(PrintBuff);
-           NDK_PrnStr("\n");        
-         
-#endif        
+           NDK_PrnStr("\n");                 
+#endif  
+           #endif //LANG_EN     
         //NDK_PrnStr("\n\n\n");	 
         ret = NDK_PrnStart();
 
@@ -4476,18 +4964,28 @@ START_PRINT:
 end1:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrClrs(); 
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Check Printer", 0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed", 0);        
+        #else                                                                                                                                                                                                                                                                                                                                             
         NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "请检查打印机", 0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0); 
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "打印失败", 0);
+        #endif 
         NDK_ScrRefresh();
         NDK_KbGetCode(2, &ucKey);
         return;                                                                                                                                                                                                                                                                                                                                                                  
 end2:
 	                                                                                                                                                                                                                                                                                                                                                     
         NDK_SysBeep();                                                                                                                                                                                                                                                                                                                                           
-        NDK_ScrClrs();                                                                                                                                                                                                                                                                                                                                      
+        NDK_ScrClrs(); 
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "Battery Low",0);                                                                                                                                                                                                                                                                                                          
+        NDK_ScrDispString(width/2 - font_width * 2, font_height * 3, "Print Failed",0);         
+        #else                                                                                                                                                                                                                                                                                                                                              
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "电量不足",0);                                                                                                                                                                                                                                                                                                          
-        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0); 
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 3, "无法执行打印",0);
+        #endif 
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);                                                                                                                                                                                                                                                                                                                                       
         return;
@@ -4495,7 +4993,11 @@ end2:
 
     } else {
         NDK_ScrClrs();
+        #ifdef LANG_EN
+        NDK_ScrDispString(width/2 - font_width * 3, font_height * 2, "Refund Failed",0);
+        #else
         NDK_ScrDispString(width/2 - font_width * 2, font_height * 2, "退款失败",0);
+        #endif
         NDK_ScrRefresh(); 
         NDK_KbGetCode(2, &ucKey);
     }    

@@ -594,7 +594,11 @@ int setPosIMSI()
         fseek(fp, 0, SEEK_SET); 
         	         
         NDK_ScrClrs();
+        #ifdef LANG_EN
+        NDK_ScrDispString(0, 0, "Input IMSI(15 digits):\n",0);        
+        #else
         NDK_ScrDispString(0, 0, "请输入IMSI(15位):\n",0);
+        #endif
         //NDK_ScrDispString(font_width * 4, height - font_height * 2, "按取消键退出\n",0);
         NDK_ScrRefresh();    
         
@@ -609,8 +613,13 @@ int setPosIMSI()
 			  } 
 			  fclose(fp);
         NDK_ScrClrs();
+        #ifdef LANG_EN
+        NDK_ScrDispString(24, 12, "IMSI Changed",0);
+        NDK_ScrDispString(24, 42, "Reboot NOW",0);        
+        #else
         NDK_ScrDispString(24, 12, "IMSI更新成功",0);
         NDK_ScrDispString(24, 42, "需要重启机器",0);
+        #endif
         NDK_ScrRefresh(); 
         
         NDK_KbGetCode(2, &ucKey);

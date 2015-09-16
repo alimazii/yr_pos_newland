@@ -68,24 +68,24 @@ struct qr_result {
 #define ALISER "182.92.173.31"
 #else
 //#define ALISER "182.92.8.2"
-//#define ALISER "182.92.21.76"
-#define ALISER "123.57.66.196"
+#define ALISER "182.92.21.76"
+//#define ALISER "123.57.66.196"
 #endif
 
 #define ORDERKEY "11"
 
-#define POSTPREORDER        "http://"ALISER":8080/qrcode/preorder/?"
-#define POSTEXCHANGE        "http://"ALISER":8080/qrcode/exchange/?"
-#define POSTEXCHANGEORDER   "http://"ALISER":8080/qrcode/exchangedorder/?"
-#define POSTQUERY           "http://"ALISER":8080/qrcode/q/?"
-#define POSTVIEW            "http://"ALISER":8080/qrcode/view/?"
-#define POSTREFUND          "http://"ALISER":8080/qrcode/refund/?"
-#define POSTTEMPLATEMD5     "http://"ALISER":8080/qrcode/template/md5/?"
-#define POSTTEMPLATE        "http://"ALISER":8080/qrcode/template/?"
-#define POSTLATESTMD5       "http://"ALISER":8080/qrcode/lastest/md5/?"
-#define POSTLATEST          "http://"ALISER":8080/qrcode/lastest/?"
+#define POSTPREORDER        "http://"ALISER":80/qrcode/preorder/?"
+#define POSTEXCHANGE        "http://"ALISER":80/qrcode/exchange/?"
+#define POSTEXCHANGEORDER   "http://"ALISER":80/qrcode/exchangedorder/?"
+#define POSTQUERY           "http://"ALISER":80/qrcode/q/?"
+#define POSTVIEW            "http://"ALISER":80/qrcode/view/?"
+#define POSTREFUND          "http://"ALISER":80/qrcode/refund/?"
+#define POSTTEMPLATEMD5     "http://"ALISER":80/qrcode/template/md5/?"
+#define POSTTEMPLATE        "http://"ALISER":80/qrcode/template/?"
+#define POSTLATESTMD5       "http://"ALISER":80/qrcode/lastest/md5/?"
+#define POSTLATEST          "http://"ALISER":80/qrcode/lastest/?"
 #ifdef  BARCODE_EN                             
-#define CREATEANDPAY        "http://"ALISER":8080/qrcode/createandpay/?"
+#define CREATEANDPAY        "http://"ALISER":80/qrcode/createandpay/?"
 #endif
 
 #ifdef BAIDU_EN
@@ -154,7 +154,7 @@ typedef struct
        char rcp_title_address[32+1];    // 小票标题地址，汉字最多16个，数字，英文最多32个
        char rcp_title_number[32+1];     // 小票标题电话，汉字最多16个，数字，英文最多32个
        char rcp_title_company[32+1];    // 小票标题公司，汉字最多16个，数字，英文最多32个
-       char rcp_tech_company[8+1];      // 小票支持公司，汉字最多4个，数字，英文最多8个
+       char rcp_tech_company[16+1];      // 小票支持公司，汉字最多4个，数字，英文最多8个
        char rcp_tech_number[12+1];      // 小票支持电话，汉字最多6个，数字，英文最多12个
 }T_RECEIPT;
 
