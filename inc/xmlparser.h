@@ -53,7 +53,7 @@ void startElement(void *userData, const XML_Char *name, const XML_Char **atts);
 void characterDataHandler(void *userData, const XML_Char *s, int len);
 
 void endElement(void *userData, const XML_Char *name);
-void endElement1(void *userData, const XML_Char *name);
+void endInitElement(void *userData, const XML_Char *name);
 void endElement2(void *userData, const XML_Char *name);
 void endElement3(void *userData, const XML_Char *name);
 void endElementPrint(void *userData, const XML_Char *name);

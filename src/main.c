@@ -8,6 +8,7 @@
 
 
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h> 
 #include <sys/wait.h>
@@ -28,6 +29,8 @@
 
 #include "NDK.h"
 #include "aliqr.h"
+#include "input.h"
+#include "adv.h"
 
 #define max(x,y) ({ typeof(x) _x = (x); typeof(y) _y = (y); (void)(&_x == &_y); _x > _y ? _x : _y; })
  
@@ -65,6 +68,9 @@ int payment_channel = 0; /* alipay:0, baidu:1, weixin:2 */
 pthread_mutex_t prmutex;
 void *thr_fn(void* arg);
 void *rcv_fn(void* arg);
+#ifdef ADVERTISEMENT_EN
+void *init_fn(void* arg);
+#endif
 
 static char Defualtdata[] = "yy-mm-dd/hh:mm";
 char* serial2date(char* serialNo)
@@ -389,7 +395,7 @@ int main(void)
     int err;
     int wait_rv;              /* return value from wait() */
     unsigned int retry_times = 5;
-    pthread_t ntid,rtid;
+    pthread_t ntid,rtid,itid;
     sigset_t sigset;
     
     struct sigaction act_handler;
@@ -438,8 +444,8 @@ int main(void)
         //return -1;
     NDK_ScrClrs();
 
-#ifdef BARCODE_EN
-//#if 0
+//#ifdef BARCODE_EN
+#if 0
     /* use serial port one for 1D Barcode Scanner */
     /* Serial Port Connection: Female to Female, 5<->5, 2<->3, 3<->2 */
     /* Port Configure: 9600-8-"No Parity"-"1 Stop Bit" */
@@ -467,7 +473,7 @@ int main(void)
     NDK_ScrRefresh();
 
     
-#ifdef NLSCAN_EN     
+#ifdef NLSCAN_EN 
     while(1){
     	
     /* for newland scan */
@@ -638,7 +644,7 @@ int main(void)
     NDK_KbGetCode(0,&ucKey);
 #endif
 
-#if 0
+#if 0   
     while(1){
 
         nbytes = 0;
@@ -794,7 +800,11 @@ int main(void)
     
     if(err != 0)
     DebugErrorInfo("!!!! receive thread create failure-----\n");
-        	 	  
+    #ifdef ADVERTISEMENT_EN    
+    err = pthread_create(&itid, NULL, init_fn, NULL);
+    if(err != 0)
+    DebugErrorInfo("!!!! init thread create failure-----\n");
+    #endif        	 	  
     while(1)
     {
     	  NDK_ScrClrs();
@@ -1670,10 +1680,15 @@ unsigned int Money2int(char* buf)
     return feeint;
 }
 
-void printAD()
+void printAD(char* imgName)
 {
-	int ret;
+	int ret, f_ret;
 	int ucKey;
+  char imgFileName[40];
+  
+  sprintf(imgFileName, "/appfs/apps/移动支付/%s.bmp",imgName);
+  f_ret = NDK_FsExist(imgFileName);                             
+  DebugErrorInfo("File %s Exist status %d\n",imgFileName,ret);
 
   NDK_ScrClrs();
   #ifdef LANG_EN
@@ -1683,9 +1698,13 @@ void printAD()
 	#endif
 	NDK_ScrRefresh();
 
-  ret = NDK_PrnInit(0);
-	ret = NDK_PrnPicture(105, "print.bmp");
-	//ret = NDK_PrnPicture(0, "print.bmp");
+  ret = NDK_PrnInit(0); 
+  if(imgName == NULL || f_ret != NDK_OK)
+	    ret = NDK_PrnPicture(105, "print.bmp");
+	else{   
+		  sprintf(imgFileName, "%s.bmp", imgName); 
+	    ret = NDK_PrnPicture(0, imgFileName);
+	}    
 	DebugErrorInfo("BMP Loading ret:[%d]\n", ret);
 	
 	ret = NDK_PrnStart();
@@ -1707,7 +1726,8 @@ void printAD()
   return;
 }
 
-void printTail(char* price, char* out_trade_no)
+//void printTail(char* price, char* out_trade_no)
+void printTail(char* price, struct qr_result* qr_out)
 {
     int ret = 0;
     char printBuff[50];
@@ -1730,15 +1750,15 @@ START_PRINT:
     sprintf(printBuff,"序列号:%lld\n",query_number);
     #endif
     NDK_PrnStr(printBuff);
-    if(strlen(out_trade_no) > 0) {
+    if(strlen(qr_out->out_trade_no) > 0) {
     	  #ifdef LANG_EN
         strcpy(printBuff,"商户订单号ORDER No:");
         #else
         strcpy(printBuff,"商户订单号:");
         #endif
-        strcat(printBuff,out_trade_no);
+        strcat(printBuff,qr_out->out_trade_no);
         NDK_PrnStr(printBuff);
-        memset(out_trade_no,0, 65);
+        memset(qr_out->out_trade_no,0, 65);
     }
     NDK_PrnStr("\n\n");
 
@@ -1778,9 +1798,14 @@ START_PRINT:
     #endif
     NDK_PrnStr(printBuff);
     NDK_PrnStr("\n");
-
-    
-
+#ifdef ADVERTISEMENT_EN
+    if (strlen(qr_out->adv_text) > 0) 
+    {
+    		strcpy(printBuff, qr_out->adv_text);
+    		NDK_PrnStr(printBuff);
+    		NDK_PrnStr("\n");
+    }
+#endif
 
 
     //开始打印    
@@ -1796,8 +1821,17 @@ START_PRINT:
         else if(PrnStatus & PRN_STATUS_NOPAPER || PrnStatus & PRN_STATUS_OVERHEAT)                                                                                                                                                                                                                                                                                                                         
             goto end1;                                                                                                                                                                                                                                                                                                                                    
     }                                                                                                                                                                                                                                                                                                                                                     
-   
-    printAD();
+#ifdef ADVERTISEMENT_EN
+    if(atoi(qr_out->receipt_ai) == 0){
+    	
+    	 DebugErrorInfo("adv index is %s\n", qr_out->receipt_ai);  
+    	 GnPQrcode(qr_out->adv_qrcode);
+    }	 
+    else	   
+       printAD(qr_out->receipt_ai);
+#else    
+       printAD(NULL );  
+#endif       
 
     NDK_PrnFeedPaper(PRN_FEEDPAPER_AFTER);   
 
@@ -1895,7 +1929,8 @@ end2:
         NDK_ScrDispString(0, 24, "稍等，正在输出二维码...",0);
         #endif
         NDK_ScrRefresh();
-        printTail(total_fee,commTestOut.out_trade_no);
+        //printTail(total_fee,commTestOut.out_trade_no);
+        printTail(total_fee,&commTestOut);
     }              
  	                                                                                                 
 //    if(query_count == 0)                                                                                
@@ -2232,7 +2267,14 @@ void *rcv_fn(void *arg)
                     #endif
             
                     //NDK_PrnStr("\n\n\n");
-            	 
+                    #ifdef ADVERTISEMENT_EN
+                    if (strlen(p_result.adv_text) > 0) 
+                    {
+                    		strcpy(PrintBuff, p_result.adv_text);
+                    		NDK_PrnStr(PrintBuff);
+                    		NDK_PrnStr("\n");
+                    }
+                    #endif            	      
             
                     //开始打印            
                     ret = NDK_PrnStart(); 
@@ -2248,6 +2290,15 @@ void *rcv_fn(void *arg)
                         else if(PrnStatus & PRN_STATUS_NOPAPER || PrnStatus & PRN_STATUS_OVERHEAT)                                                                                                                                                                                                                                                                                                                         
                             goto end1;                                                                                                                                                                                                                                                                                                                                    
                     } 
+                    #ifdef ADVERTISEMENT_EN
+                        if(atoi(p_result.receipt_ai) == 0){
+                        	
+                        	 DebugErrorInfo("adv index is %s\n", p_result.receipt_ai);  
+                        	 GnPQrcode(p_result.adv_qrcode);
+                        }	 
+                        else	   
+                           printAD(p_result.receipt_ai);
+                    #endif                    
                     NDK_PrnFeedPaper(PRN_FEEDPAPER_AFTER);
 #ifdef RECEIPT_REP                     
                     if(prn_repeat == 1) {
@@ -4515,7 +4566,7 @@ void barcodePay(int pipe_id)
         NDK_ScrDispString(0, font_height * 2, "  ",0);
     } 
     NDK_ScrRefresh();
-#if 1 
+#if 0 
     NDK_PortClrBuf(PORT_NUM_COM1); /* clear rcv buf in case of scanning before */      
     while(1){
     	   
@@ -4565,7 +4616,7 @@ void barcodePay(int pipe_id)
         }    
     }
 #endif
-#if 0         
+#if 1         
     ret = NDK_KbGetInput(buff, 18, 18, NULL, INPUTDISP_NORMAL, 0, INPUT_CONTRL_LIMIT_ERETURN); 
     
     if(ret != NDK_OK)
@@ -5005,218 +5056,78 @@ end2:
 }
 #endif
 
-/* nX,nY should greater than 1, pszOut value: 123 instead of 1.23(decimal point is not included),nMinLen and nMaxLen
-   only count the digits  */
-int AmountInput(int nX, int nY, char* pszOut, int* pnOutLen, int nMinLen, int nMaxLen, int nTimeOut)
-{
-	  char	cCurLetter;
-	  int		i,j;
-	  int		x = 0,y = 0;
-	  int		nKey;	/*处理按键信息*/
-	  int		nNum = 0;			/*字符的个数*/
-	  int		numoffset = 0;	
-	  int		nShowChange = 1;	/*判断是否有效按键按下*/
-	  int		tableoffset = 0;
-    //int		nAmoutFlag = 0;
-	  int		nMaxHzLines;
-	  long int	lnBigNum,lnSmallNum;
-	  uint unX,unY;
-	  uint unScrWidth,unScrHeight;
-	  uint unFontWidth,unFontHeight;
-	  char	szTmp[80];			/*临时变量*/
-	  char	szGetBuf[80];	
-
-	  x = nX - 1;
-	  y = nY - 1;	
-	    
-	  nNum = strlen(pszOut);
-	  if (nNum > nMaxLen)
-	  {
-	  	return NDK_ERR;
-	  }
-	
-	  NDK_ScrGetViewPort(&unX, &unY, &unScrWidth,&unScrHeight);
-	  NDK_ScrGetFontSize(&unFontWidth, &unFontHeight);
-	  //nMaxHzLines = (unScrHeight+1)/(unFontHeight+UI_GetHspace());
-	  memset (szTmp, 0, sizeof(szTmp));
-	  memset (szGetBuf, 0 ,sizeof(szGetBuf));	
-	  
-		if (nNum > 0) //如果预先有内容
-		{
-			if(nNum > 9)
-			{//atol 最大值2147483647 (10位)
-				memcpy(szTmp,pszOut,nNum-2);
-				sprintf( szGetBuf, "%ld%s", atol(szTmp),pszOut+nNum-2 );
-			}
-			else
-			{
-				sprintf( szGetBuf, "%ld", atol(pszOut) );
-			}
-			nNum = strlen(szGetBuf);
-		}
-
-		#ifdef LANG_EN
-		NDK_ScrDispString(font_width * 2, height - font_height * 2, "Back KEY to Correct" ,0);
-		#else
-		NDK_ScrDispString(font_width * 2, height - font_height * 2, "输错请按[退格]键" ,0);	
-		#endif
-		NDK_ScrRefresh();
-		NDK_KbHit( &nKey );  
-		
-		for (;;)
-		{
-		if (nShowChange == 1)
-		{			
-				//sprintf(szTmp, "%12ld.%02ld", atol(szGetBuf) / 100, atol(szGetBuf) % 100);
-				if(strlen(szGetBuf)>9)
-				{//atol 最大值2147483647 (10位)
-					memset(szTmp,0,sizeof(szTmp));
-					memcpy(szTmp,szGetBuf,strlen(szGetBuf)-2);
-					lnBigNum = atol(szTmp);
-					memset(szTmp,0,sizeof(szTmp));
-					memcpy(szTmp,szGetBuf+strlen(szGetBuf)-2,2);
-					lnSmallNum= atol(szTmp);
-					memset(szTmp,0,sizeof(szTmp));
-					sprintf(szTmp, "%12ld.%02ld", lnBigNum, lnSmallNum);
-				}
-				else
-				{
-					sprintf(szTmp, "%12ld.%02ld", atol(szGetBuf) / 100, atol(szGetBuf) % 100);
-				}
-				//BsDispBigAscStr (x+unScrWidth/(unFontWidth/2)-15, y, szTmp, 15);	
-				DebugErrorInfo("the amount sting is %s,nNum is %d, szTmp len is %d\n",szTmp,nNum,strlen(szTmp));
-				NDK_ScrDispString(0, y, szTmp ,0);	
-				//NDK_ScrDispString(width/2 - (font_width/2)*((nNum+15)/2), y, szTmp ,0);
-				NDK_ScrRefresh();	
-		}
-		nShowChange = 1;
-		/*按键处理*/
-		//nKey = PubGetKeyCode(nTimeOut);
-		NDK_KbGetCode(nTimeOut, &nKey);
-		switch (nKey)
-		{
-		case 0:
-			return NDK_ERR_TIMEOUT;
-		/**<字母键*/
-		case K_ZMK:
-			/*如果字符串输入功能建按下输入字母符号*/
-			break;
-		case K_DOT:
-			/*非一般字串模式下不允许输入'.'*/
-      break;
-    case K_ZERO:  
-		case K_ONE:
-		case K_TWO:
-		case K_THREE:
-		case K_FOUR:
-		case K_FIVE:
-		case K_SIX:
-		case K_SEVEN:
-		case K_EIGHT:
-		case K_NINE:
-			if(nKey == K_ZERO)
-			{/*金额输入不能以0开始*/
-				if (nNum == 0)
-				{
-					#if 0
-					if (nMaxHzLines >= 8)
-					{//GP710,GP730
-						//PubBeep(3);
-						nAmoutFlag = 1;
-						//NDK_ScrDispString(unFontWidth, (unFontHeight+UI_GetHspace())*(nMaxHzLines-2), "不允许零金额输入",0);
-					  #ifdef LANG_EN
-		        NDK_ScrDispString(font_width, height - font_height * 2, "No ZERO Input" ,0);
-		        #else
-		        NDK_ScrDispString(font_width, height - font_height * 2, "不允许零金额输入" ,0);	
-		        #endif
-					}
-					#endif
-					break;
-				}
-			}
-//			if (nMaxHzLines >= 8)
-//			{//GP710,GP730
-//				if (1 == nAmoutFlag)
-//				{
-//					//NDK_ScrDispString(unFontWidth, 14*8, "                ",0);
-//					//TODO:PubClearLine(nMaxHzLines-1,nMaxHzLines-1);
-//				}
-//			}
-			if (nNum >= nMaxLen)
-			{
-				//PubBeep(1);
-			}			
-			else 
-			{
-				szGetBuf[nNum] = nKey;
-				nNum++;
-				if(strlen(szGetBuf)>9)
-				{//atol 最大值2147483647 (10位)
-					memset(szTmp,0,sizeof(szTmp));
-					memcpy(szTmp,szGetBuf,strlen(szGetBuf)-2);
-					lnBigNum= atol(szTmp);
-					if(lnBigNum > 200000000)
-					{
-						szGetBuf[--nNum] = 0;
-						//PubBeep(1);
-					}
-				}
-			}
-			break;
-		case K_BASP:
-			if (nNum > 0)
-			{
-				szGetBuf[--nNum] = 0;
-
-			}
-			break;
-		case K_ENTER:
-			if ((nNum >= nMinLen) && (nNum <= nMaxLen))
-			{
-				/*清光标*/
-				if( nMinLen == 1 ) //如果金额输入不允许0,
-				{
-					if( atol(szGetBuf) == 0 )
-					{
-						#if 0
-						if (nMaxHzLines >= 8)
-						{//GP710,GP730
-							//PubBeep(3);
-							nAmoutFlag = 1;
-							//NDK_ScrDispString(unFontWidth, (unFontHeight+UI_GetHspace())*(nMaxHzLines-2), "不允许零金额输入",0);
-							#ifdef LANG_EN
-		          NDK_ScrDispString(font_width, height - font_height * 2, "No ZERO Input" ,0);
-		          #else
-		          NDK_ScrDispString(font_width, height - font_height * 2, "不允许零金额输入" ,0);	
-		          #endif
-		          NDK_ScrRefresh();
-						}
-						#endif
-						break;
-					}
-				}
-				//memcpy (pszOut, szGetBuf, nNum);
-				//pszOut[nNum] = '\0'
-				sprintf(pszOut, "%ld.%02ld", atol(szGetBuf) / 100, atol(szGetBuf) % 100);
-				*pnOutLen = strlen(pszOut);
-				return NDK_OK;
-			}
-			break;
-		case K_ESC:
-			/*清光标*/
-//			if (nEditMask != INPUT_MODE_AMOUNT)
-//			{
-//				BsDispBigASC (x + nNum, y, POS_WHITE_CHAR);
-//			}
-			return NDK_ERR;
-
-		case K_F1:
-		case K_F2:
-			nShowChange = 0;
-			break;	
-		default:
-			nShowChange = 0;
-			break;
-		}
-	}
-}	                                                                                                                                                                                                                                                                                                                                               
+#ifdef ADVERTISEMENT_EN
+void *init_fn(void* arg)                                                                                                    
+{                                                                                                  
+ 	  int ret = 0; 
+ 	  int pic_num, i;
+ 	  char *pic_name_str[50] = {NULL};
+    struct configInitResult qInitResult; 
+    char img_post_data[100];
+    char imgFileName[40];
+    //char *total_fee = (char*)arg;                                                                                                                                                            
+	  getIMSIconfig();                                                                                 
+                                                                                                      
+    if(jfkey[0] == 0 && getPosKey() > 0){                                                            
+        DebugErrorInfo("Get POS KEY Error from thr_fn!\n");                                                                    
+        return 1;                                                                                      
+ 	  }                                                                                                                        
+    strcpy(qrpay_info.imsi, pos_imsi);                           
+ 	  strcpy(qrpay_info.order_key, jfkey);                                                             
+    
+    /* TODO: using it one day */
+#if 0    
+    sprintf(img_post_data, "i=%s", pos_imsi);
+    ret = imgOpPost(IMG_CLEAR, img_post_data);                                                                                                       
+     
+    if(ret > 0)
+    	 return ret;
+#endif    	                                                                                                
+    //ret = generator_qrcode_to_bmp((void*)&commTestOut,total_fee,(void*)&commTestIn); 
+    /* init image list from backend server */
+    alipay_main(&qInitResult, &qrpay_info, ALI_PW_INIT);
+    if(qInitResult.is_success == 'T') {
+    	  DebugErrorInfo("advertisement pic are %s\n",qInitResult.init_adv_index);
+    	  pic_num = SplitStr(qInitResult.init_adv_index, pic_name_str, ",");
+    	  
+    	  for (i = 0; i < pic_num; i++){
+    	  	  ret = initLoadImg(pic_name_str[i]);
+    	  	  if(ret > 0)
+    	          return ret; 
+    	  	  sprintf(img_post_data, "ai=%s&i=%s", pic_name_str[i], pos_imsi); 
+    	  	  ret = imgOpPost(IMG_CONFIRM, img_post_data);
+    	  	  if(ret > 0)
+    	          return ret;
+    	  }	
+         
+        pic_num = SplitStr(qInitResult.init_del_index, pic_name_str, ",");
+        
+        for (i = 0; i < pic_num; i++){
+        	  sprintf(imgFileName, "/appfs/apps/移动支付/%s.bmp",pic_name_str[i]);
+    	  	  ret = NDK_FsExist(imgFileName);
+    	  	  DebugErrorInfo("File %s Exist status %d\n",imgFileName,ret);
+    	  	  if(ret == NDK_OK) {    	  	      
+    	  	      ret = NDK_FsDel(imgFileName); 
+    	  	      DebugErrorInfo("File %s Exist status %d\n",imgFileName,ret);
+    	  	      if(ret == NDK_OK){
+    	  	          sprintf(img_post_data, "ai=%s&i=%s", pic_name_str[i], pos_imsi); 
+    	  	          ret = imgOpPost(IMG_DEL_CONFIRM, img_post_data);
+    	  	          if(ret > 0)
+    	                  return ret;
+    	  	      }
+    	  	  }else{
+    	  	  	  /* If file is not exist, we also should inform server */
+    	  	  	  sprintf(img_post_data, "ai=%s&i=%s", pic_name_str[i], pos_imsi); 
+    	  	      ret = imgOpPost(IMG_DEL_CONFIRM, img_post_data);
+                if(ret > 0)
+    	               return ret;    	  	      
+    	  	  }	
+    	  } 
+        return 0;
+    }    
+    else
+        return 1;
+               
+ 	                                                                                                                                                                                          
+ }
+#endif                                                                                                                                                                                                                                                                                                                                               

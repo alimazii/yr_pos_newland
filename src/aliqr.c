@@ -56,6 +56,11 @@ int alipay_precreate(char* precr, int* len, struct payInfo* order_info,int type)
         case ALI_CREATEANDPAY:
         	  *len = sprintf(common,PRECREATE);
         	  break;
+#endif
+#ifdef ADVERTISEMENT_EN
+        case ALI_PW_INIT:
+        	  *len = sprintf(common,PREINIT);
+        	  break;
 #endif            
         default:
             *len = sprintf(common,PREIMSI);
@@ -114,7 +119,11 @@ char* alipay_postcreate(int type)
 #ifdef BARCODE_EN
         case ALI_CREATEANDPAY:
             return CREATEANDPAY;
-#endif            
+#endif 
+#ifdef ADVERTISEMENT_EN
+        case ALI_PW_INIT:
+        	  return POSTINIT;
+#endif           
         default:
             break;
     }

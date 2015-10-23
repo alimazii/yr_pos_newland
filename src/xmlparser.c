@@ -38,11 +38,15 @@ char timemark[32]={0};
 #if 0
 char qrout_trade_no[65]={0};
 #endif
-static struct qr_result* st_query_result;  
+static struct qr_result* st_query_result;
+#ifdef ADVERTISEMENT_EN
+static struct configInitResult* st_config_result;
+#endif  
 extern char time_mark[32];
 extern pthread_mutex_t prmutex;
 
-int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int order_type)
+//int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int order_type)
+int alipay_main(void *query_result, struct payInfo* order_info, int order_type)
 {
 	  pthread_mutex_lock(&prmutex);
     CURL *curl;
@@ -52,8 +56,21 @@ int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int 
 
     XML_Parser parser;
     struct ParserStruct state;
-    st_query_result = query_result;
-    memset(query_result, 0, sizeof(struct qr_result));
+
+#ifdef ADVERTISEMENT_EN    
+    if(order_type == ALI_PW_INIT) {
+    	st_config_result = (struct configInitResult*)query_result;
+    	memset((struct configInitResult*)query_result, 0, sizeof(struct configInitResult));
+    }
+    else {	
+      st_query_result = (struct qr_result*)query_result;
+      memset((struct qr_result*)query_result, 0, sizeof(struct qr_result));
+    }
+#else
+    st_query_result = (struct qr_result*)query_result;
+    memset((struct qr_result*)query_result, 0, sizeof(struct qr_result));
+#endif    
+    
     /* Initialize the state structure for parsing. */
     memset(&state, 0, sizeof(struct ParserStruct));
     state.ok = 1;
@@ -61,7 +78,12 @@ int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int 
     /* Initialize a namespace-aware parser. */
     parser = XML_ParserCreateNS(NULL, '\0');
     XML_SetUserData(parser, &state);
-    XML_SetElementHandler(parser, startElement, endElement);
+#ifdef ADVERTISEMENT_EN    
+    if(order_type == ALI_PW_INIT)
+      XML_SetElementHandler(parser, startElement, endInitElement);
+    else
+#endif    	
+    	XML_SetElementHandler(parser, startElement, endElement);
     XML_SetCharacterDataHandler(parser, characterDataHandler);
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -136,7 +158,10 @@ int alipay_main(struct qr_result *query_result, struct payInfo* order_info, int 
                 }
                 memset(stqrcode,0,QRRESULTSTR);
                 #endif
-                memcpy(query_result->time_mark,timemark,strlen(timemark));                
+                #ifdef ADVERTISEMENT_EN
+                if(order_type != ALI_PW_INIT)
+                #endif	
+                    memcpy((struct qr_result*)st_query_result->time_mark,timemark,strlen(timemark));                
 #if 0
                 if(stqrcode[0] != '\0') {
                     memcpy(query_result->order,stqrcode,strlen(stqrcode));
@@ -311,7 +336,24 @@ void endElement(void *userData, const XML_Char *name)
             memcpy(st_query_result->pay_channel, state->characters.memory,state->characters.size);
         }
     }
-#endif    
+#endif 
+#ifdef ADVERTISEMENT_EN
+    if( strcmp(name,"ai") == 0) {//payment channel
+        if(state->characters.memory != NULL) {
+            memcpy(st_query_result->receipt_ai, state->characters.memory,state->characters.size);
+        }
+    }
+    if( strcmp(name,"ae") == 0) {//payment channel
+        if(state->characters.memory != NULL) {
+            memcpy(st_query_result->adv_qrcode, state->characters.memory,state->characters.size);
+        }
+    }
+    if( strcmp(name,"ac") == 0) {//payment channel
+        if(state->characters.memory != NULL) {
+            memcpy(st_query_result->adv_text, state->characters.memory,state->characters.size);
+        }
+    }        
+#endif   
 #if 0
     if( strcmp(name,"result") == 0) {
         if(strstr(state->characters.memory, "qr.alipay.com")) {
@@ -371,3 +413,29 @@ size_t parseStreamCallback(void *contents, size_t length, size_t nmemb, void *us
 
   return real_size;
 }
+#ifdef ADVERTISEMENT_EN
+void endInitElement(void *userData, const XML_Char *name)
+{
+    struct ParserStruct *state = (struct ParserStruct *) userData;
+    state->depth--;
+    if(state->characters.size && state->characters.size < 2048) { //in case of buffer overflow in serial port
+    printf("%5lu    %5lu   %10lu   %s %s\n",state->tags, state->depth, state->characters.size, name, state->characters.memory);
+    DebugErrorInfo("%5lu    %5lu   %10lu   %s %s\n",state->tags, state->depth, state->characters.size, name, state->characters.memory);
+    }
+    if( strcmp(name,"is") == 0) { //is_success
+        if(state->characters.memory != NULL) {
+            memcpy(&st_config_result->is_success, state->characters.memory,state->characters.size);
+        }
+    }     
+    if( strcmp(name,"iai") == 0) {//order
+        if(state->characters.memory != NULL) {
+            memcpy(st_config_result->init_adv_index, state->characters.memory,state->characters.size);
+        }
+    }
+    if( strcmp(name,"idi") == 0) {//order
+        if(state->characters.memory != NULL) {
+            memcpy(st_config_result->init_del_index, state->characters.memory,state->characters.size);
+        }
+    }
+} 
+#endif   

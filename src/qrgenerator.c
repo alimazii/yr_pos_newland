@@ -9,7 +9,7 @@
 #include "NDK.h"
 #include "QR_Encode.h"
 
-
+  
 struct payInfo qrpay_info;
 unsigned long long query_number = 0;
 unsigned long long query_number_idx = 1;
@@ -707,3 +707,40 @@ int create_and_pay(void* gout, char* price, char* dynamic_id ,void* gin)
     return 0;	
 }	
 #endif
+
+
+int GnPQrcode(char* qr_string)
+{
+	    int ret;
+	    DataInfo qrDataInfo;
+      BmpInfo qrBmpBuff;
+      
+	    if(strlen(qr_string) > 0) {  
+        /* print QR code on D620D */
+        //ret = PrintQR(10, 1, 2, szSourceString, 5, 5);
+        //ret = PrintQR(6, 1, 2, szSourceString, 5, 7);
+        ////ret = PrintQR(6, 3, 2, out->qrcode, 50, 7);
+        qrDataInfo.nLen = strlen(qr_string);
+        qrDataInfo.nLevel = QR_LEVEL_H;
+        qrDataInfo.nMask = -1; /* default mask value */
+        qrDataInfo.nVersion = QR_VRESION_S;
+        strcpy(qrDataInfo.szInputData,qr_string);
+        /* firstly created bmp buffer with qr string from alipay */
+        EncodeDataAndGenerateBmp(&qrDataInfo, &qrBmpBuff);
+        ret = NDK_PrnInit(0);
+        if(ret != NDK_OK)
+        	  return ret;
+        NDK_PrnImage(qrBmpBuff.xsize, qrBmpBuff.ysize, 110, qrBmpBuff.bmpbuff); /* offset to 110 pixel */	
+        ret = NDK_PrnStart(); 
+        //printf("qrcode:%s\n",qr_string);
+        DebugErrorInfo("qrcode:%s\n",qr_string);
+
+        if (0 > ret)
+        {
+            DebugErrorInfo("the PrintQR return value is %d\n",ret);
+        }
+      } else {
+          ret = 1;
+      }   
+      return ret;
+}	

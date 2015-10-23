@@ -54,6 +54,11 @@ struct qr_result {
     char version[30+1];
 #ifdef BAIDU_EN
     char pay_channel[8];
+#endif
+#ifdef ADVERTISEMENT_EN
+    char receipt_ai[10];    //advertisement index
+    char adv_qrcode[128+1]; //qrcode for advertisement
+    char adv_text[60+1];    //advertisement text
 #endif        
 };
 //#ifdef BAIDU_EN
@@ -68,24 +73,29 @@ struct qr_result {
 #define ALISER "182.92.173.31"
 #else
 //#define ALISER "182.92.8.2"
-#define ALISER "182.92.21.76"
-//#define ALISER "123.57.66.196"
+//#define ALISER "182.92.21.76"
+#define ALISER "123.57.66.196"
 #endif
 
 #define ORDERKEY "11"
+#define PORT 8080
+#define SER_PORT "8080"
 
-#define POSTPREORDER        "http://"ALISER":80/qrcode/preorder/?"
-#define POSTEXCHANGE        "http://"ALISER":80/qrcode/exchange/?"
-#define POSTEXCHANGEORDER   "http://"ALISER":80/qrcode/exchangedorder/?"
-#define POSTQUERY           "http://"ALISER":80/qrcode/q/?"
-#define POSTVIEW            "http://"ALISER":80/qrcode/view/?"
-#define POSTREFUND          "http://"ALISER":80/qrcode/refund/?"
-#define POSTTEMPLATEMD5     "http://"ALISER":80/qrcode/template/md5/?"
-#define POSTTEMPLATE        "http://"ALISER":80/qrcode/template/?"
-#define POSTLATESTMD5       "http://"ALISER":80/qrcode/lastest/md5/?"
-#define POSTLATEST          "http://"ALISER":80/qrcode/lastest/?"
+#define POSTPREORDER        "http://"ALISER":"SER_PORT"/qrcode/preorder/?"
+#define POSTEXCHANGE        "http://"ALISER":"SER_PORT"/qrcode/exchange/?"
+#define POSTEXCHANGEORDER   "http://"ALISER":"SER_PORT"/qrcode/exchangedorder/?"
+#define POSTQUERY           "http://"ALISER":"SER_PORT"/qrcode/q/?"
+#define POSTVIEW            "http://"ALISER":"SER_PORT"/qrcode/view/?"
+#define POSTREFUND          "http://"ALISER":"SER_PORT"/qrcode/refund/?"
+#define POSTTEMPLATEMD5     "http://"ALISER":"SER_PORT"/qrcode/template/md5/?"
+#define POSTTEMPLATE        "http://"ALISER":"SER_PORT"/qrcode/template/?"
+#define POSTLATESTMD5       "http://"ALISER":"SER_PORT"/qrcode/lastest/md5/?"
+#define POSTLATEST          "http://"ALISER":"SER_PORT"/qrcode/lastest/?"
 #ifdef  BARCODE_EN                             
-#define CREATEANDPAY        "http://"ALISER":80/qrcode/createandpay/?"
+#define CREATEANDPAY        "http://"ALISER":"SER_PORT"/qrcode/createandpay/?"
+#endif
+#ifdef  ADVERTISEMENT_EN
+#define POSTINIT            "http://"ALISER":"SER_PORT"/qrcode/init/?"
 #endif
 
 #ifdef BAIDU_EN
@@ -105,6 +115,9 @@ struct qr_result {
 #ifdef BARCODE_EN
 #define PRECREATE "di=%s&i=%s&ot=%s&sj=%s&sn=%lld&tf=%s", order_info->dynamic_id, order_info->imsi, order_info->order_time,order_info->order_subject, order_info->order_number, order_info->total_fee
 #endif
+#ifdef ADVERTISEMENT_EN
+#define PREINIT "i=%s", order_info->imsi
+#endif
 
 enum precreate_type {
     ALI_PREORDER = 0, /* require an online order qrcode from alipay */
@@ -119,6 +132,9 @@ enum precreate_type {
     ALI_TEMPLATE,
     ALI_LASTESTMD5,
     ALI_LASTEST,
+#ifdef ADVERTISEMENT_EN
+    ALI_PW_INIT,    /* init config and pic when power on */
+#endif    
 #ifdef BARCODE_EN    
     ALI_CREATEANDPAY
 #endif    
@@ -171,3 +187,20 @@ int setPosKey();
 void getIMSIconfig();
 int getsubject(char* name,char* buf);
 #endif
+
+#ifdef ADVERTISEMENT_EN
+/* configuration info request */
+struct configInitResult {
+    char is_success;
+    char imsi[16+1];
+    char pay_channel[8];    
+    char init_adv_index[128];
+    char init_del_index[128];
+
+#ifdef BARCODE_EN
+    char dynamic_id[18+1]; //payment id
+#endif
+ 
+};
+#endif
+/* configuration result */

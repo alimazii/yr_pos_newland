@@ -11,4 +11,5 @@ int createrefund(void* gout, char* serial_number, char* refund_amount );
 int preImsi(void* gout, int precreate_type);
 int qTimemark(void* gout, char* time_mark);
 int qMaxtime(void* gout, int max_time);
+int GnPQrcode(char * qr_string);
 #endif
